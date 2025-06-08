@@ -1,39 +1,358 @@
+/* General Body Styles - Enhanced */
 body {
-  font-family: Arial, sans-serif;
-  background: #f7f7f7;
-  padding: 30px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Modern, clean font */
+    background: linear-gradient(to right, #ece9e6, #ffffff); /* Subtle gradient background */
+    display: flex;
+    justify-content: center;
+    align-items: top; /* Align to top initially, allow content to scroll */
+    min-height: 100vh;
+    margin: 0;
+    padding-bottom: 90px; /* Increased padding to accommodate fixed footer */
+    color: #333; /* Default text color */
 }
 
+/* Form Container Styles - Enhanced */
 .form-container {
-  max-width: 500px;
-  margin: auto;
-  background: white;
-  padding: 20px;
-  border-radius: 10px;
-  box-shadow: 0 0 10px #ccc;
+    background-color: #fff;
+    padding: 40px; /* Slightly more padding */
+    border-radius: 12px; /* Softer, more modern rounded corners */
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15); /* More pronounced, softer shadow */
+    width: 100%;
+    max-width: 650px; /* Slightly wider form */
+    margin-top: 30px; /* Push down slightly from top */
+    margin-bottom: 80px; /* Increased margin for fixed footer */
+    border: 1px solid #e0e0e0; /* Subtle border for definition */
 }
 
-.form-group {
-  margin-bottom: 15px;
+h2 {
+    text-align: center;
+    color: #2c3e50; /* Deeper, more impactful heading color */
+    margin-bottom: 25px; /* More space below heading */
+    font-size: 2em; /* Larger heading */
+    letter-spacing: 0.5px; /* Subtle letter spacing */
 }
 
-input, textarea {
-  width: 100%;
-  padding: 10px;
-  margin-top: 5px;
-  border: 1px solid #ccc;
-  border-radius: 6px;
+/* Progress Bar Styles - Enhanced */
+.progress-bar {
+    width: 100%;
+    background-color: #e9ecef; /* Lighter background for the bar */
+    border-radius: 8px;
+    height: 12px; /* Slightly taller */
+    margin-bottom: 35px;
+    overflow: hidden;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1); /* Inner shadow for depth */
+}
+
+.progress-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(to right, #4CAF50, #6edc6e); /* Gradient for progress fill */
+    border-radius: 8px;
+    transition: width 0.6s ease-in-out; /* Slower, smoother transition */
+}
+
+/* Question Block Styles - Enhanced */
+.question-block {
+    margin-bottom: 25px; /* More space between questions */
+    padding: 15px 0; /* Add some vertical padding */
+}
+
+.question-text {
+    font-size: 1.25em;
+    margin-bottom: 18px;
+    color: #444; /* This is already a dark gray, close to black */
+    font-weight: 600;
+    line-height: 1.4; 
+}
+
+/* Input and Label Styles for Radio Buttons - Enhanced */
+label {
+    display: flex; /* Use flex for better alignment of radio/checkbox with text */
+    align-items: center; /* Vertically align items */
+    margin-bottom: 12px; /* Slightly more space between options */
+    font-size: 1.05em; /* Slightly larger label font */
+    color: #444;
+    cursor: pointer;
+    transition: color 0.2s ease; /* Smooth color transition on hover */
+}
+
+label:hover {
+    color: #007bff; /* Highlight on hover */
+}
+
+label input[type="radio"],
+label input[type="checkbox"] {
+    margin-right: 12px; /* More space between input and text */
+    transform: scale(1.2); /* Slightly larger radio/checkbox */
+    accent-color: #007bff; /* Use primary color for radio/checkbox fill */
+    cursor: pointer;
+}
+
+input[type="number"],
+input[type="text"] {
+    width: calc(100% - 24px); /* Adjusted width for padding */
+    padding: 12px; /* More padding */
+    margin-top: 8px; /* More space above input */
+    border: 1px solid #ced4da; /* Lighter, softer border */
+    border-radius: 8px; /* More rounded corners */
+    box-sizing: border-box;
+    font-size: 1.05em;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease; /* Smooth transitions for focus */
+}
+
+input[type="number"]:focus,
+input[type="text"]:focus {
+    border-color: #80bdff; /* Blue border on focus */
+    outline: none;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25); /* Subtle blue glow on focus */
+}
+
+/* Fixed Button Bar Container */
+.fixed-button-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: #ffffff; /* White background for the bar */
+    padding: 18px 30px; /* More vertical padding */
+    box-shadow: 0 -4px 15px rgba(0, 0, 0, 0.1); /* Stronger, softer shadow on top */
+    z-index: 1000;
+    border-top: 1px solid #e0e0e0; /* Subtle top border */
+}
+
+/* Button Container Styles (now inside the fixed-button-bar) */
+.button-container {
+    display: flex;
+    justify-content: space-between;
+    max-width: 650px; /* Match the max-width of your form-container */
+    margin: 0 auto; /* Center the buttons within the fixed bar */
+}
+
+.button-container div {
+    display: flex;
+    gap: 15px; /* Slightly more space between buttons */
 }
 
 button {
-  background-color: #4285f4;
-  color: white;
-  padding: 10px 15px;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
+    padding: 12px 25px; /* More padding for larger buttons */
+    border: none;
+    border-radius: 8px; /* More rounded buttons */
+    cursor: pointer;
+    font-size: 1.05em;
+    font-weight: 600; /* Bolder button text */
+    transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease; /* All button transitions */
+    letter-spacing: 0.2px;
 }
 
 button:hover {
-  background-color: #3367d6;
+    transform: translateY(-2px); /* Slight lift effect on hover */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* Shadow on hover */
+}
+
+#backBtn {
+    background-color: #6c757d;
+    color: white;
+}
+
+#backBtn:hover {
+    background-color: #5a6268;
+}
+
+#nextBtn {
+    background-color: #007bff;
+    color: white;
+}
+
+#nextBtn:hover {
+    background-color: #0056b3;
+}
+
+#submitBtn {
+    background-color: #28a745;
+    color: white;
+}
+
+#submitBtn:hover {
+    background-color: #218838;
+}
+
+/* Status Message Styles - Enhanced */
+#status {
+    text-align: center;
+    margin-top: 25px; /* More space above status */
+    font-weight: 600; /* Bolder status message */
+    font-size: 1.1em;
+    padding: 10px;
+    border-radius: 6px;
+}
+
+/* Multi-section Checkbox Styles - Enhanced */
+.section {
+    margin-bottom: 25px;
+    padding: 20px; /* More padding */
+    border: 1px solid #dee2e6; /* Softer border */
+    border-radius: 10px; /* More rounded */
+    background-color: #f8f9fa; /* Lighter background */
+}
+
+.section h4 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    color: #212529; /* Change from #28a745 (green) to black/dark gray */
+    font-size: 1.3em;
+    border-bottom: 2px solid #e9ecef;
+    padding-bottom: 10px;
+}
+
+/* Yes/No Grid Styles - Enhanced */
+.yes-no-grid {
+    margin: 25px 0;
+    border: 1px solid #dee2e6;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05); /* Subtle shadow */
+}
+
+.grid-header {
+    background-color: #f0f2f5; /* Slightly darker header background */
+    display: flex;
+    align-items: center;
+    padding: 12px; /* More padding */
+    font-weight: bold;
+    border-bottom: 1px solid #ced4da;
+    color: #333;
+}
+
+.appliance-label {
+    flex: 1;
+    font-size: 1.05em;
+}
+
+.yes-no-options {
+    display: flex;
+    width: 140px; /* Slightly wider options area */
+    justify-content: space-around;
+}
+
+.grid-row {
+    display: flex;
+    align-items: center;
+    padding: 12px;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.grid-row:last-child {
+    border-bottom: none;
+}
+
+.grid-row:nth-child(even) {
+    background-color: #fefefe; /* Very light alternative row background */
+}
+
+.appliance-name {
+    flex: 1;
+    font-weight: 500;
+    color: #555;
+}
+
+.yes-no-buttons {
+    display: flex;
+    width: 140px;
+    justify-content: space-around;
+}
+
+.yes-no-buttons label {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    margin-bottom: 0;
+    font-size: 1em; /* Keep smaller for tight grid */
+    transition: color 0.2s ease;
+}
+
+.yes-no-buttons label:hover {
+    color: #007bff;
+}
+
+.yes-no-buttons input[type="radio"] {
+    margin: 0;
+    margin-right: 5px; /* Small gap */
+    transform: scale(1.1); /* Slightly larger */
+    accent-color: #007bff;
+}
+
+.other-input-grid {
+    padding: 15px;
+    background-color: #f8f9fa;
+    border-top: 1px solid #e0e0e0;
+}
+
+/* Multiple Number Input Styles - Enhanced */
+.multiple-number-inputs {
+    display: flex;
+    flex-direction: column;
+    gap: 18px; /* More space between rows */
+    margin: 25px 0;
+}
+
+.number-input-row {
+    display: flex;
+    align-items: center;
+    padding: 15px;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    background-color: #f8f9fa;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05); /* Subtle shadow */
+}
+
+.number-input-row:nth-child(even) {
+    background-color: #ffffff; /* White background for even rows */
+}
+
+.device-label {
+    flex: 1;
+    font-weight: 500;
+    margin-right: 20px; /* More space */
+    color: #555;
+    font-size: 1.05em;
+}
+
+.number-input-row input[type="number"] {
+    width: 90px; /* Slightly wider input */
+    padding: 8px 10px; /* More padding */
+    border: 1px solid #ced4da;
+    border-radius: 5px;
+    text-align: center;
+    font-size: 1em;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.number-input-row input[type="number"]:focus {
+    border-color: #80bdff;
+    outline: none;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+/* Input Section Styles (for type "input" questions like Q114) - Enhanced */
+.input-section {
+    margin-bottom: 25px;
+    padding: 20px;
+    border: 1px solid #dee2e6;
+    border-radius: 10px;
+    background-color: #f8f9fa;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.input-section h4 {
+    margin-top: 0;
+    margin-bottom: 18px;
+    color: #212529; 
+    font-size: 1.3em;
+    border-bottom: 2px solid #e9ecef;
+    padding-bottom: 10px;
+}
+
+/* Other input for radio buttons */
+.other-input {
+    margin-top: 15px; /* More space */
 }

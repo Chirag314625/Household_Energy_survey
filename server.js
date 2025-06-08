@@ -1,38 +1,42 @@
+// server.js
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
+const path = require("path");
+
 const app = express();
 
+// Middleware
 app.use(cors());
 app.use(express.json());
-app.use(express.static("public")); // Serve frontend
+// Serve static files from the 'public' directory
+app.use(express.static(path.join(__dirname, "public")));
 
 // Connect to MongoDB
-mongoose.connect("mongodb://localhost:27017/forms", {
+mongoose.connect("mongodb+srv://Chirag_Patel:Itlzq62tUKqiNSUN@ecommorce-website.y5hae.mongodb.net/", {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 });
 
-// Define Schema & Model
-const formSchema = new mongoose.Schema({
-  name: String,
-  email: String,
-  feedback: String,
-});
+// Schema
+// Defining a flexible schema to accept various survey data
+const formSchema = new mongoose.Schema({}, { strict: false });
 const Form = mongoose.model("Form", formSchema);
 
-// Submit form route
-app.post("/submit", async (req, res) => {
+// Submit endpoint - Corrected to match the frontend (index.html)
+app.post("/api/submit-survey", async (req, res) => {
   try {
     const newForm = new Form(req.body);
     await newForm.save();
     res.json({ message: "Form submitted successfully!" });
   } catch (error) {
-    res.status(500).json({ message: "Error saving form data." });
+    console.error("Error saving form data:", error); // Log the error for debugging
+    res.status(500).json({ error: "Error saving form data.", details: error.message });
   }
 });
 
 // Start server
-app.listen(3000, () => {
-  console.log("Server running on http://localhost:3000");
+const PORT = 3000;
+app.listen(PORT, () => {
+  console.log(`Server running at http://localhost:${PORT}`);
 });
