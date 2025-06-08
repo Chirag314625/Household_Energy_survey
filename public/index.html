@@ -806,9 +806,9 @@
         q.section.forEach((inputSection, index) => {
           const input = document.querySelector(`input[name="q${q.id}_${index}"]`);
           if (input) {
-            formData[`Q${q.id}_${inputSection.title}`] = input.value;
+            formData[`Q${q.id}_${index}`] = input.value;
           } else {
-            delete formData[`Q${q.id}_${inputSection.title}`];
+            delete formData[`Q${q.id}_${index}`];
           }
         });
       } else {
@@ -912,28 +912,46 @@
 
     function validateForm() {
       const statusDiv = document.getElementById("status");
-      // Assuming 'questions' is an array of your survey questions and 'formData' stores the answers
-      // You'll need to adapt this based on how your questions and answers are structured.
-      // For example, if your 'questions' array has an 'id' for each question.
+      const visibleQuestions = getVisibleQuestions();
+      const missingQuestions = [];
 
-      if (Object.keys(formData).length !== questions.length) { // Simple check: number of answers matches number of questions
-          statusDiv.textContent = "Please answer all questions before submitting.";
-          statusDiv.style.color = "orange"; // Or red, depending on severity
-          return false;
+      visibleQuestions.forEach((question, index) => {
+        let hasAnswer = false;
+
+        if (question.input === "number") {
+          hasAnswer = formData[`Q${question.id}`] && formData[`Q${question.id}`].trim() !== "";
+        } else if (question.type === "checkbox") {
+          hasAnswer = question.sections.some(section => 
+            formData[`Q${question.id}_${section.title}`]
+          );
+        } else if (question.type === "yes_no_grid") {
+          hasAnswer = question.appliances.some(appliance => 
+            formData[`Q${question.id}_${appliance}`]
+          );
+        } else if (question.type === "multiple_number") {
+          hasAnswer = question.devices.some((device, deviceIndex) => 
+            formData[`Q${question.id}_${deviceIndex}`] && formData[`Q${question.id}_${deviceIndex}`].trim() !== ""
+          );
+        } else if (question.type === "input") {
+          hasAnswer = question.section.some((inputSection, sectionIndex) => 
+            formData[`Q${question.id}_${sectionIndex}`] && formData[`Q${question.id}_${sectionIndex}`].trim() !== ""
+          );
+        } else {
+          hasAnswer = formData[`Q${question.id}`];
+        }
+
+        if (!hasAnswer) {
+          missingQuestions.push(index + 1); // Question number (1-based)
+        }
+      });
+
+      if (missingQuestions.length > 0) {
+        statusDiv.textContent = `Please answer all questions. Missing: Question ${missingQuestions.join(', ')}`;
+        statusDiv.style.color = "red";
+        return false;
       }
 
-      // More robust validation: Iterate through each question and check if it has an answer
-      for (const question of questions) {
-          // This assumes each question has an 'id' and formData uses these IDs as keys
-          if (!formData.hasOwnProperty(question.id) || formData[question.id] === null || formData[question.id] === "") {
-              statusDiv.textContent = `Please answer all questions. Question "${question.text}" is unanswered.`;
-              statusDiv.style.color = "orange";
-              return false;
-          }
-      }
-
-      // If all checks pass
-      statusDiv.textContent = ""; // Clear any previous status message
+      statusDiv.textContent = "";
       return true;
     }
 
