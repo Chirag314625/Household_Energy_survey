@@ -9,8 +9,20 @@ const app = express();
 // Middleware
 app.use(cors());
 app.use(express.json());
-// Serve static files from the 'public' directory
+
+// --- START CHANGES HERE ---
+
+// Explicitly serve home.html when the root URL is accessed
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "home.html"));
+});
+
+// Serve static files from the 'public' directory for other requests
+// This should come AFTER the specific route for '/' if you want home.html to be the default
 app.use(express.static(path.join(__dirname, "public")));
+
+// --- END CHANGES HERE ---
+
 
 // Connect to MongoDB
 mongoose.connect("mongodb+srv://Chirag_Patel:Itlzq62tUKqiNSUN@ecommorce-website.y5hae.mongodb.net/", {
