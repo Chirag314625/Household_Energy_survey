@@ -24,6 +24,7 @@
 
   <script>
     const questions = [
+      // General & Household Demographics
       {
         id: 0,
         text: "What is your name?",
@@ -40,6 +41,17 @@
           { name: "pincode", placeholder: "Pincode", type: "text", pattern: "^\\d{6}$", validationMessage: "Please enter a valid 6-digit numeric Pincode." }
         ]
       },
+      {
+        id: 162,
+        text: "How many members of your household are adults (18 years of age or older)?",
+        input: "number",
+        placeholder: "Number of adults",
+        min: "0",
+        step: "1",
+        name: "num_adults"
+      },
+
+      // Home Characteristics
       {
         id: 1,
         text: "Which best describes your home?",
@@ -71,10 +83,17 @@
         options: ["Before 1970", "1970 to 1979", "1980 to 1989", "1990 to 1999", "2000 to 2009", "2010 to 2019", "2020 to present"],
         condition: { questionId: 2, value: "Rent" },
         name: "move_in_year"
+      },{
+        id: 5,
+        text: "What is the approximate square footage of your home? If you do not know, please enter your best estimate. If you live in an apartment, please include the square footage of your unit only, not the entire building.",
+        input: "number",  
+        placeholder: "Square footage",
+        min: "0", 
+        step: "1",            
       },
       {
         id: 16,
-        text: "Which of the following areas are included in your estimate of square footage? (Multiple selections allowed)",
+        text: "Which of the following areas are included in your estimate of square footage?",
         type: "checkbox",
         sections: [
           {
@@ -94,9 +113,11 @@
           }
         ]
       },
+
+      // Kitchen Appliances
       {
         id: 36,
-        text: "How many refrigerators are plugged-in and turned on in your home? Include refrigerators in basements or garages, even if they are only used occasionally, and also include compact refrigerators and wine chillers. If none, please enter \"0.\"",
+        text: "How many refrigerators(fridge) are plugged-in and turned on in your home? Include refrigerators in basements or garages, even if they are only used occasionall. If none, please enter \"0.\"",
         input: "number",
         placeholder: "Number of refrigerators",
         min: "0",
@@ -146,7 +167,7 @@
       },
       {
         id: 49,
-        text: "How many stoves/ranges do you have in your home? A stove has both a cooktop and an oven.",
+        text: "How many stoves/ranges do you have in your home? A stove has both a cooktop and an oven.If none, please enter \"0.\"",
         input: "number",
         placeholder: "Number of stoves/ranges",
         min: "0",
@@ -168,7 +189,7 @@
       },
       {
         id: 56,
-        text: "How many separate wall ovens do you have in your home? Do not include wall ovens that are attached to a cooktop.",
+        text: "How many separate wall ovens do you have in your home? Do not include wall ovens that are attached to a cooktop.If none, please enter \"0.\"",
         input: "number",
         placeholder: "Number of separate wall ovens",
         min: "0",
@@ -213,6 +234,8 @@
           "Other (please specify)"
         ]
       },
+
+      // Laundry Appliances
       {
         id: 68,
         text: " Does your household have a clothes washer? Do not include community clothes washers that are located in the basement or laundry room of your apartment building.",
@@ -226,7 +249,7 @@
         placeholder: "Times per week",
         min: "0",
         step: "1",
-        condition: { questionId: 68, value: "Yes" }, // Conditional on having a washer
+        condition: { questionId: 68, value: "Yes" },
         name: "clothes_washer_usage"
       },
       {
@@ -241,9 +264,11 @@
           "20 or more years old",
           "Don't know"
         ],
-        condition: { questionId: 68, value: "Yes" }, // Conditional on having a washer
+        condition: { questionId: 68, value: "Yes" },
         name: "clothes_washer_age"
       },
+
+      // Electronics & Internet Usage
       {
         id : 78,
         text: " How many televisions are used in your home? If none, please enter \"0.\" ",
@@ -315,6 +340,8 @@
         condition: { questionId: 89, value: "Yes" },
         name: "has_wireless_router"
       },
+
+      // Space Heating
       {
         id : 91,
         text: "Is your home heated during the winter?",
@@ -369,6 +396,8 @@
         condition: { questionId: 91, value: "Yes" },
         name: "main_heating_fuel"
       },
+
+      // Air Conditioning & Cooling
       {
         id: 103,
         text: "Is any air conditioning equipment used in your home? ",
@@ -403,7 +432,8 @@
         ],
         condition: { questionId: 104, value: "Yes" },
         name: "central_ac_age"
-      },{
+      },
+      {
         id: 114,
         text: "The next questions are about the temperature inside your home during the summer. If you have a thermostat, think about where your household sets the temperature for your air conditioning equipment. If you do not have a thermostat, your best guess about the temperature is fine. ",
         type: "input_group",
@@ -413,7 +443,7 @@
             inputType: "number",
             placeholder: "degrees",
             min: -273.15,
-            step: "0.01", // Changed from "any" to "0.01"
+            step: "0.01",
             name: "temp_summer_day_home"
           },
           {
@@ -421,7 +451,7 @@
             inputType: "number",
             placeholder: "degrees",
             min: -273.15,
-            step: "0.01", // Changed from "any" to "0.01"
+            step: "0.01",
             name: "temp_summer_day_away"
           },
           {
@@ -429,11 +459,11 @@
             inputType: "number",
             placeholder: "degrees",
             min: -273.15,
-            step: "0.01", // Changed from "any" to "0.01"
+            step: "0.01",
             name: "temp_summer_night"
           }
         ],
-        condition: { questionId: 103, value: "Yes" } // Only ask if AC is used
+        condition: { questionId: 103, value: "Yes" }
       },
       {
         id: 117,
@@ -446,6 +476,8 @@
           { label: "Number of attic fans", name: "num_attic_fans" }
         ]
       },
+
+      // Water Heating
       {
         id: 120,
         text: "Where is the main water heating equipment for your home located? ",
@@ -460,11 +492,11 @@
         id: 121,
         text: " What is the approximate size of your main water heater? ",
         options: [
-          "small (less than 30 gallons)",
-          "medium (30 to 49 gallons)",
-          "large (more than 50)",
-          "tankless (on-demand)",
-          "Don't know"
+            "Small (less than 15 litres)",
+            "Medium (15 to 25 litres)",
+            "Large (more than 25 litres)",
+            "Tankless (instant/on-demand)",
+            "Don't know"
         ],
         name: "water_heater_size"
       },
@@ -496,6 +528,8 @@
         ],hasOther: true,
         name: "water_heater_fuel"
       },
+
+      // Lighting
       {
         id : 126,
         text: " Approximately how many light bulbs are installed inside your home? Include light bulbs in ceiling fixtures and fans, table and floor lamps, as well as those used infrequently, such as in hallways, closets, and garages. For fixtures with multiple bulbs, count each bulb separately. ",
@@ -530,6 +564,8 @@
           "LED (light-emitting diode)"
         ]
       },
+
+      // Energy Payment & Generation
       {
         id: 142,
         text:"Which of the following describes who is responsible for paying for the electricity used in this home?",
@@ -585,15 +621,6 @@
         name: "on_site_electricity_generation"
       },
       {
-        id: 162,
-        text: "How many members of your household are adults (18 years of age or older)?",
-        input: "number",
-        placeholder: "Number of adults",
-        min: "0",
-        step: "1",
-        name: "num_adults"
-      },
-      {
         id: 164,
         text: "What is your average annual household spending on electricity?",
         options: [
@@ -615,12 +642,12 @@
       {
         id : 182,
         text: "Please provide as much of the following information as you can about your fuel oil or kerosene deliveries:",
-        type: "input_group", // Changed type to input_group for clarity
+        type: "input_group",
         section: [
           {
             title: "tank size",
             inputType: "number",
-            placeholder: "liters", // Changed from gallons to liters
+            placeholder: "liters",
             min: "0",
             step: "any",
             name: "fuel_oil_tank_size"
@@ -634,9 +661,9 @@
             name: "fuel_oil_num_deliveries_past_year"
           },
           {
-            title: "Total liters of fuel oil or kerosene used in the past year:", // Changed from gallons to liters
+            title: "Total liters of fuel oil or kerosene used in the past year:",
             inputType: "number",
-            placeholder: "Total liters", // Changed from gallons to liters
+            placeholder: "Total liters",
             min: "0",
             step: "any",
             name: "fuel_oil_total_gallons_past_year"
@@ -661,7 +688,7 @@
       {
         id: 184,
         text: "Please provide as much of the following information as you can about your wood use:",
-        type: "input_group", // Changed type to input_group for clarity
+        type: "input_group",
         section: [
           {
             title: "Total amount of wood pellets used in the past year:",

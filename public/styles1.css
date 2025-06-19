@@ -278,7 +278,8 @@ h1 {
   padding: 2rem;
   border-radius: var(--radius-lg);
   margin-bottom: 2rem;
-  border-left: 4px solid var(--primary-color);
+  /*border-left: 4px solid var(--primary-color);*/
+  box-shadow: var(--shadow-md);
 }
 
 .progress-info h3 {
