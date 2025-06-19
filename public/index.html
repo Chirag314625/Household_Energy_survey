@@ -4,32 +4,42 @@
   <meta charset="UTF-8" />
   <title>Survey Form</title>
   <link rel="stylesheet" href="styles.css" />
+  
 </head>
 <body>
   <div class="form-container">
     <h2>Residential Energy Consumption Survey</h2>
-    <div class="progress-bar">
-      <div class="progress-fill" id="progressFill"></div>
-    </div>
     <form id="surveyForm">
-      <div id="questions"></div>
+      <div id="questions">
+        </div>
       <div class="fixed-button-bar">
         <div class="button-container">
-          <div>
-            <button type="button" id="backBtn" style="display: none;">Back</button>
-          </div>
-          <div>
-            <button type="button" id="nextBtn">Next</button>
-            <button type="submit" id="submitBtn" style="display: none;">Submit</button>
-          </div>
+          <button type="button" id="resetBtn">Reset</button>
+          <button type="submit" id="submitBtn">Submit</button>
         </div>
       </div>
     </form>
-    <div id="status"></div>
+    <div id="status" style="margin-top: 20px;"></div>
   </div>
 
   <script>
     const questions = [
+      {
+        id: 0,
+        text: "What is your name?",
+        input: "text",
+        placeholder: "Your full name",
+        name: "name"
+      },
+      {
+        id: 0.1,
+        text: "What is your city and pincode?",
+        input: "multiple",
+        inputs: [
+          { name: "city", placeholder: "City", type: "text" },
+          { name: "pincode", placeholder: "Pincode", type: "text", pattern: "^\\d{6}$", validationMessage: "Please enter a valid 6-digit numeric Pincode." }
+        ]
+      },
       {
         id: 1,
         text: "Which best describes your home?",
@@ -39,24 +49,28 @@
           "Single-family house attached to one or more other houses (for example: duplex, row house, or townhome)",
           "Apartment in a building with 2 to 4 units",
           "Apartment in a building with 5 or more units"
-        ]
+        ],
+        name: "home_type"
       },
       {
         id: 2,
         text: "Do you own or rent your home?",
-        options: ["Own", "Rent"]
+        options: ["Own", "Rent"],
+        name: "ownership"
       },
       {
         id: 3,
         text: "When was your home built?",
         options: ["Before 1970", "1970 to 1979", "1980 to 1989", "1990 to 1999", "2000 to 2009", "2010 to 2019", "2020 to present"],
-        condition: { questionId: 2, value: "Own" }
+        condition: { questionId: 2, value: "Own" },
+        name: "year_built"
       },
       {
         id: 4,
         text: "When did your household move in?",
         options: ["Before 1970", "1970 to 1979", "1980 to 1989", "1990 to 1999", "2000 to 2009", "2010 to 2019", "2020 to present"],
-        condition: { questionId: 2, value: "Rent" }
+        condition: { questionId: 2, value: "Rent" },
+        name: "move_in_year"
       },
       {
         id: 16,
@@ -65,14 +79,17 @@
         sections: [
           {
             title: "A. Basement",
+            name: "sq_ft_basement",
             options: ["Yes", "No", "Don't know", "Not applicable (my home does not have this space)"]
           },
           {
             title: "B. Attic",
+            name: "sq_ft_attic",
             options: ["Yes", "No", "Don't know", "Not applicable (my home does not have this space)"]
           },
           {
             title: "C. Attached garage",
+            name: "sq_ft_garage",
             options: ["Yes", "No", "Don't know", "Not applicable (my home does not have this space)"]
           }
         ]
@@ -81,7 +98,10 @@
         id: 36,
         text: "How many refrigerators are plugged-in and turned on in your home? Include refrigerators in basements or garages, even if they are only used occasionally, and also include compact refrigerators and wine chillers. If none, please enter \"0.\"",
         input: "number",
-        placeholder: "Number of refrigerators"
+        placeholder: "Number of refrigerators",
+        min: "0",
+        step: "1",
+        name: "num_refrigerators"
       },
       {
         id: 37,
@@ -93,7 +113,8 @@
           "Large (22.6 to 29.5 cubic feet)",
           "Very large (bigger than 29.5 cubic feet)"
         ],
-        condition: { questionId: 36, operator: "greater", value: 0 }
+        condition: { questionId: 36, operator: "greater", value: 0 },
+        name: "refrigerator_size"
       },
       {
         id: 38,
@@ -105,7 +126,8 @@
           "Two doors, freezer below the refrigerator",
           "Three or more doors"
         ],
-        condition: { questionId: 36, operator: "greater", value: 0 }
+        condition: { questionId: 36, operator: "greater", value: 0 },
+        name: "refrigerator_type"
       },
       {
         id: 39,
@@ -119,13 +141,17 @@
           "20 or more years old",
           "Don't know"
         ],
-        condition: { questionId: 36, operator: "greater", value: 0 }
+        condition: { questionId: 36, operator: "greater", value: 0 },
+        name: "refrigerator_age"
       },
       {
         id: 49,
         text: "How many stoves/ranges do you have in your home? A stove has both a cooktop and an oven.",
         input: "number",
-        placeholder: "Number of stoves/ranges"
+        placeholder: "Number of stoves/ranges",
+        min: "0",
+        step: "1",
+        name: "num_stoves"
       },
       {
         id: 50,
@@ -137,13 +163,17 @@
           "Other (please specify)"
         ],
         hasOther: true,
-        condition: { questionId: 49, operator: "greater", value: 0 }
+        condition: { questionId: 49, operator: "greater", value: 0 },
+        name: "stove_fuel"
       },
       {
         id: 56,
         text: "How many separate wall ovens do you have in your home? Do not include wall ovens that are attached to a cooktop.",
         input: "number",
-        placeholder: "Number of separate wall ovens"
+        placeholder: "Number of separate wall ovens",
+        min: "0",
+        step: "1",
+        name: "num_wall_ovens"
       },
       {
         id: 57,
@@ -155,14 +185,18 @@
           "Other (please specify)"
         ],
         hasOther: true,
-        condition: { questionId: 56, operator: "greater", value: 0 }
+        condition: { questionId: 56, operator: "greater", value: 0 },
+        name: "wall_oven_fuel"
       },
       {
         id: 58,
         text: "In a typical week, about how many times is your most used separate wall oven used? If not used, please enter \"0.\"",
         input: "number",
         placeholder: "Times per week",
-        condition: { questionId: 56, operator: "greater", value: 0 }
+        min: "0",
+        step: "1",
+        condition: { questionId: 56, operator: "greater", value: 0 },
+        name: "wall_oven_usage"
       },
       {
         id: 63,
@@ -177,18 +211,25 @@
           "Rice cooker",
           "Blender or juicer",
           "Other (please specify)"
-        ],
-        hasOther: true
-      },{
+        ]
+      },
+      {
         id: 68,
         text: " Does your household have a clothes washer? Do not include community clothes washers that are located in the basement or laundry room of your apartment building.",
         options: ["Yes", "No"],
-      },{
+        name: "has_clothes_washer"
+      },
+      {
         id: 70,
         text : " In a typical week, about how many times is your clothes washer used? If not used, please enter \"0.\"",
         input: "number",
         placeholder: "Times per week",
-      },{
+        min: "0",
+        step: "1",
+        condition: { questionId: 68, value: "Yes" }, // Conditional on having a washer
+        name: "clothes_washer_usage"
+      },
+      {
         id: 73,
         text: "About how old is your clothes washer? Your best estimate is fine. ",
         options: [
@@ -200,12 +241,19 @@
           "20 or more years old",
           "Don't know"
         ],
-      },{
+        condition: { questionId: 68, value: "Yes" }, // Conditional on having a washer
+        name: "clothes_washer_age"
+      },
+      {
         id : 78,
         text: " How many televisions are used in your home? If none, please enter \"0.\" ",
         input: "number",
-        placeholder: "Number of televisions"
-      },{
+        placeholder: "Number of televisions",
+        min: "0",
+        step: "1",
+        name: "num_televisions"
+      },
+      {
         id: 79,
         text: "What is the size of your most used television?",
         options: [
@@ -214,7 +262,10 @@
           "40 to 59 inches",
           "60 inches or larger"
         ],
-      },{
+        condition: { questionId: 78, operator: "greater", value: 0 },
+        name: "tv_size"
+      },
+      {
         id: 80,
         text: "What type of television do you have?",
         options: [
@@ -224,38 +275,53 @@
           "Plasma",
           "OLED (organic light-emitting diode)",
           "Other (please specify)"
-        ],hasOther: true
-      },{
+        ],hasOther: true,
+        condition: { questionId: 78, operator: "greater", value: 0 },
+        name: "tv_type"
+      },
+      {
         id : 81,
         text : " Thinking about your most used television's use on weekdays, how many hours is it turned on each day? Include the time it is on even if no one is actually watching it. ",
         input : "number",
-        placeholder : "Hours per day"
+        placeholder : "Hours per day",
+        min: "0",
+        step: "1",
+        condition: { questionId: 78, operator: "greater", value: 0 },
+        name: "tv_daily_hours"
       },
       {
         id: 88,
         text: "How many of each of the following are used in your home? If none, please enter \"0.\"",
         type: "multiple_number",
         devices: [
-          "Number of desktop computers",
-          "Number of laptop computers",
-          "Number of tablet computers or e-readers (for example: iPad or Kindle)",
-          "Number of printers, scanners, fax machines, or copiers",
-          "Number of \"smart\" phones (for example, iPhone or Android)",
-          "Number of other cellular phones"
+          { label: "Number of desktop computers", name: "num_desktop_computers" },
+          { label: "Number of laptop computers", name: "num_laptop_computers" },
+          { label: "Number of tablet computers or e-readers (for example: iPad or Kindle)", name: "num_tablets_ereaders" },
+          { label: "Number of printers, scanners, fax machines, or copiers", name: "num_printers_scanners_etc" },
+          { label: "Number of \"smart\" phones (for example, iPhone or Android)", name: "num_smart_phones" },
+          { label: "Number of other cellular phones", name: "num_other_cell_phones" }
         ]
-      },{
+      },
+      {
         id: 89,
         text: "In your home, do you or any members of your household access the Internet? ",
-        options: ["Yes", "No"]
-      },{
+        options: ["Yes", "No"],
+        name: "access_internet"
+      },
+      {
         id: 90,
         text: " Is a wireless router used in your home for accessing the Internet?",
         options: ["Yes", "No", "Don't know"],
-      },{
+        condition: { questionId: 89, value: "Yes" },
+        name: "has_wireless_router"
+      },
+      {
         id : 91,
         text: "Is your home heated during the winter?",
-        options: ["Yes", "No, I do not have any heating equipment.", " No, I have heating equipment but do not use it."]
-      },{
+        options: ["Yes", "No, I do not have any heating equipment.", " No, I have heating equipment but do not use it."],
+        name: "is_home_heated"
+      },
+      {
         id : 92,
         text: " What is the main type of heating equipment used to provide heat for your home?",
         options: [
@@ -268,8 +334,12 @@
           "Heating stove burning wood, coal, or coke",
           "Portable electric heaters",
           "Other (please specify)"
-        ],hasOther: true
-      },{
+        ],
+        hasOther: true,
+        condition: { questionId: 91, value: "Yes" },
+        name: "main_heating_equipment"
+      },
+      {
         id: 93,
         text: "About how old is your main heating equipment? Your best estimate is fine. ",
         options: [
@@ -281,7 +351,10 @@
           "20 or more years old",
           "Don't know"
         ],
-      },{
+        condition: { questionId: 91, value: "Yes" },
+        name: "main_heating_equipment_age"
+      },
+      {
         id : 94,
         text:"What is the main fuel used by this equipment for heating your home?",
         options: [
@@ -291,20 +364,32 @@
           "Fuel oil or kerosene",
           "Wood",
           "Other (please specify)"
-        ],hasOther: true
-      },{
+        ],
+        hasOther: true,
+        condition: { questionId: 91, value: "Yes" },
+        name: "main_heating_fuel"
+      },
+      {
         id: 103,
         text: "Is any air conditioning equipment used in your home? ",
-        options: ["Yes", "No"]
-      },{
+        options: ["Yes", "No"],
+        name: "has_ac"
+      },
+      {
         id: 104,
         text: " Do you use a central air conditioning system?",
         options: ["Yes", "No"],
-      },{
+        condition: { questionId: 103, value: "Yes" },
+        name: "uses_central_ac"
+      },
+      {
         id : 105,
         text:" Is your central air conditioning system a heat pump? ",
         options: ["Yes", "No", "Don't know"],
-      },{
+        condition: { questionId: 104, value: "Yes" },
+        name: "central_ac_is_heat_pump"
+      },
+      {
         id : 106,
         text : "About how old is your central air conditioning system? Your best estimate is fine. ",
         options: [
@@ -316,44 +401,62 @@
           "20 or more years old",
           "Don't know"
         ],
+        condition: { questionId: 104, value: "Yes" },
+        name: "central_ac_age"
       },{
         id: 114,
         text: "The next questions are about the temperature inside your home during the summer. If you have a thermostat, think about where your household sets the temperature for your air conditioning equipment. If you do not have a thermostat, your best guess about the temperature is fine. ",
-        type: "input",
-        section:[
+        type: "input_group",
+        section: [
           {
             title: " During the summer, what is the typical temperature when someone is home during the day? ",
             inputType: "number",
-            placeholder: "degrees"
-          },{
+            placeholder: "degrees",
+            min: -273.15,
+            step: "0.01", // Changed from "any" to "0.01"
+            name: "temp_summer_day_home"
+          },
+          {
             title: " What is the typical temperature when no one is inside your home during the day? ",
             inputType: "number",
-            placeholder: "degrees"
-          },{
+            placeholder: "degrees",
+            min: -273.15,
+            step: "0.01", // Changed from "any" to "0.01"
+            name: "temp_summer_day_away"
+          },
+          {
             title: " What is the typical temperature inside your home at night? ",
             inputType: "number",
-            placeholder: "degrees"
+            placeholder: "degrees",
+            min: -273.15,
+            step: "0.01", // Changed from "any" to "0.01"
+            name: "temp_summer_night"
           }
-        ]
-      },{
+        ],
+        condition: { questionId: 103, value: "Yes" } // Only ask if AC is used
+      },
+      {
         id: 117,
         text: "How many of the following types of fans does your household use? If none, please enter “0.”",
         type: "multiple_number",
         devices: [
-          "Number of ceiling fans ",
-          "Number of floor or window fans ",
-          "Number of whole house fans ",
-          "Number of attic fans "
+          { label: "Number of ceiling fans", name: "num_ceiling_fans" },
+          { label: "Number of floor or window fans", name: "num_floor_window_fans" },
+          { label: "Number of whole house fans", name: "num_whole_house_fans" },
+          { label: "Number of attic fans", name: "num_attic_fans" }
         ]
-      },{
+      },
+      {
         id: 120,
         text: "Where is the main water heating equipment for your home located? ",
         options: [
-          "Inside my home or garage ",
-          "Outside my home/garage (for example: in the basement of an apartment building) ",
+          "Inside my home or garage",
+          "Outside my home/garage (for example: in the basement of an apartment building)",
           "Other (please specify)"
-        ], hasOther: true
-      },{
+        ], hasOther: true,
+        name: "water_heater_location"
+      },
+      {
         id: 121,
         text: " What is the approximate size of your main water heater? ",
         options: [
@@ -362,8 +465,10 @@
           "large (more than 50)",
           "tankless (on-demand)",
           "Don't know"
-        ]
-      },{
+        ],
+        name: "water_heater_size"
+      },
+      {
         id:122,
         text: "About how old is your main water heater? Your best estimate is fine. ",
         options: [
@@ -374,8 +479,10 @@
           "15 to 19 years old",
           "20 or more years old",
           "Don't know"
-        ]
-      },{
+        ],
+        name: "water_heater_age"
+      },
+      {
         id: 123,
         text: "What fuel does your main water heater use?",
         options: [
@@ -386,8 +493,10 @@
           "Solar",
           "Don't know",
           "Other (please specify)"
-        ],hasOther: true
-      },{
+        ],hasOther: true,
+        name: "water_heater_fuel"
+      },
+      {
         id : 126,
         text: " Approximately how many light bulbs are installed inside your home? Include light bulbs in ceiling fixtures and fans, table and floor lamps, as well as those used infrequently, such as in hallways, closets, and garages. For fixtures with multiple bulbs, count each bulb separately. ",
         options: [
@@ -398,13 +507,19 @@
           "40 to 49",
           "50 or more",
           "Don't know"
-        ]
-      },{
+        ],
+        name: "num_light_bulbs_total"
+      },
+      {
         id: 127,
         text: " How many of the light bulbs inside your home are used at least 4 hours per day? ",
         input: "number",
-        placeholder: "Light bulbs"
-      },{
+        placeholder: "Light bulbs",
+        min: "0",
+        step: "1",
+        name: "num_light_bulbs_4hr_plus"
+      },
+      {
         id: 133,
         text: " Are any of the following types of light bulbs used outside your home? ",
         type: "yes_no_grid",
@@ -413,8 +528,9 @@
           "Natural gas lights",
           "CFL (compact fluorescent lamp)",
           "LED (light-emitting diode)"
-        ],
-      },{
+        ]
+      },
+      {
         id: 142,
         text:"Which of the following describes who is responsible for paying for the electricity used in this home?",
         options: [
@@ -423,8 +539,10 @@
           "Some is paid by the household, some is included in the rent or condo fee",
           "Don't know",
           "Other (please specify)"
-        ], hasOther: true
-      },{
+        ], hasOther: true,
+        name: "electricity_payment_responsibility"
+      },
+      {
         id : 143,
         text: "Which of the following describes who is responsible for paying for the natural gas used in this home?",
         options: [
@@ -433,8 +551,10 @@
           "Some is paid by the household, some is included in the rent or condo fee",
           "Don't know",
           "Other (please specify)"
-        ], hasOther: true
-      },{
+        ], hasOther: true,
+        name: "natural_gas_payment_responsibility"
+      },
+      {
         id:145,
         text: "Which of the following describes who is responsible for paying for the fuel oil used in this home?",
         options: [
@@ -443,12 +563,16 @@
           "Some is paid by the household, some is included in the rent or condo fee",
           "Don't know",
           "Other (please specify)"
-        ], hasOther: true
-      },{
+        ], hasOther: true,
+        name: "fuel_oil_payment_responsibility"
+      },
+      {
         id: 151,
         text: "Does your household have a back-up generator that can be used for generating electricity in case of a power outage or emergency?",
-        options: ["Yes", "No"]
-      },{
+        options: ["Yes", "No"],
+        name: "has_backup_generator"
+      },
+      {
         id: 152,
         text: "Not including back-up generators, does your home have any of these on-site systems that generate electricity? Please select all that apply.",
         options: [
@@ -457,414 +581,459 @@
           "Small wind turbine",
           "Combined heat and power system",
           "Other (please specify)"
-        ], hasOther: true
-      },{
+        ], hasOther: true,
+        name: "on_site_electricity_generation"
+      },
+      {
         id: 162,
         text: "How many members of your household are adults (18 years of age or older)?",
         input: "number",
-        placeholder: "Number of adults"
-      },{
+        placeholder: "Number of adults",
+        min: "0",
+        step: "1",
+        name: "num_adults"
+      },
+      {
         id: 164,
-        text:"Including all income sources, which category best describes the total combined income of all household members for the last year,before taxes and deductions?",
+        text: "What is your average annual household spending on electricity?",
         options: [
-          "Less than $25,000",
-          "$25,000 to $49,999",
-          "$50,000 to $74,999",
-          "$75,000 to $99,999",
-          "$100,000 to $149,999",
-          "$150,000 or more",
+          "Less than ₹50,000",
+          "₹50,000 to ₹1,00,000",
+          "₹1,00,001 to ₹1,50,000",
+          "₹1,50,001 to ₹2,00,000",
+          "More than ₹2,00,000",
           "Prefer not to answer"
-        ]
-      },{
+        ],
+        name: "avg_annual_electricity_spending"
+      },
+      {
         id : 181,
         text: "Does your household receive fuel oil or kerosene deliveries?",
-        options: ["Yes", "No"]
-      },{
+        options: ["Yes", "No"],
+        name: "receives_fuel_oil_deliveries"
+      },
+      {
         id : 182,
         text: "Please provide as much of the following information as you can about your fuel oil or kerosene deliveries:",
-        type: "input",
+        type: "input_group", // Changed type to input_group for clarity
         section: [
           {
             title: "tank size",
             inputType: "number",
-            placeholder: "gallons"
+            placeholder: "liters", // Changed from gallons to liters
+            min: "0",
+            step: "any",
+            name: "fuel_oil_tank_size"
           },
           {
             title: "Number of fuel oil or kerosene deliveries in the past year:",
             inputType: "number",
-            placeholder: "Number of deliveries"
+            placeholder: "Number of deliveries",
+            min: "0",
+            step: "1",
+            name: "fuel_oil_num_deliveries_past_year"
           },
           {
-            title: "Total gallons of fuel oil or kerosene used in the past year:",
+            title: "Total liters of fuel oil or kerosene used in the past year:", // Changed from gallons to liters
             inputType: "number",
-            placeholder: "Total gallons"
+            placeholder: "Total liters", // Changed from gallons to liters
+            min: "0",
+            step: "any",
+            name: "fuel_oil_total_gallons_past_year"
           },
           {
             title: "Total cost of fuel oil or kerosene used in the past year:",
             inputType: "number",
-            placeholder: "Total cost in rupees"
+            placeholder: "Total cost in rupees",
+            min: "0",
+            step: "any",
+            name: "fuel_oil_total_cost_past_year"
           }
-        ]
-      },{
+        ],
+        condition: { questionId: 181, value: "Yes" }
+      },
+      {
         id:183,
         text: "does your household use wood for fuel?",
-        options: ["Yes", "No"]
-      },{
+        options: ["Yes", "No"],
+        name: "uses_wood_for_fuel"
+      },
+      {
         id: 184,
         text: "Please provide as much of the following information as you can about your wood use:",
-        type: "input",
+        type: "input_group", // Changed type to input_group for clarity
         section: [
           {
             title: "Total amount of wood pellets used in the past year:",
             inputType: "number",
-            placeholder: "tons"
+            placeholder: "tons",
+            min: "0",
+            step: "any",
+            name: "wood_pellets_total_amount_past_year"
           },
           {
             title: "Total cost of wood used in the past year:",
             inputType: "number",
-            placeholder: "Cost in rupees"
+            placeholder: "Cost in rupees",
+            min: "0",
+            step: "any",
+            name: "wood_total_cost_past_year"
           }
-        ]
+        ],
+        condition: { questionId: 183, value: "Yes" }
       }
     ];
 
-    let currentIndex = 0;
-    const formData = {};
     const questionsDiv = document.getElementById("questions");
-    const nextBtn = document.getElementById("nextBtn");
-    const backBtn = document.getElementById("backBtn");
-    const submitBtn = document.getElementById("submitBtn");
-    const progressFill = document.getElementById("progressFill");
+    const surveyForm = document.getElementById("surveyForm");
+    const resetBtn = document.getElementById("resetBtn");
+    const statusDiv = document.getElementById("status");
 
-    function updateProgress() {
-      const visibleQuestions = getVisibleQuestions();
-      // Ensure progress is calculated correctly even when no questions are visible
-      const progress = (visibleQuestions.length > 0) ? ((currentIndex + 1) / visibleQuestions.length) * 100 : 0;
-      progressFill.style.width = progress + "%";
+    // Function to render all questions
+   function renderAllQuestions() {
+  questionsDiv.innerHTML = ""; // Clear existing content
+
+  questions.forEach(q => {
+    const block = document.createElement("div");
+    block.className = "question-block";
+    block.setAttribute("data-question-id", q.id); // For conditional visibility
+
+    const questionText = document.createElement("div");
+    questionText.className = "question-text";
+    questionText.textContent = q.text;
+    block.appendChild(questionText);
+
+    let inputHtml = '';
+
+    if (q.input === "number" || q.input === "text") {
+      inputHtml = `<input type="${q.input}" name="Q${q.id}_${q.name}" placeholder="${q.placeholder || ''}" ${q.min !== undefined ? `min="${q.min}"` : ''} ${q.step !== undefined ? `step="${q.step}"` : ''} required>`;
+      block.innerHTML += inputHtml;
+    } else if (q.input === "multiple") {
+      // MODIFIED BLOCK FOR CITY AND PINCODE ALIGNMENT
+      let multipleInputHtml = ''; // Use a separate variable for this specific block
+      q.inputs.forEach(inputDef => {
+        const inputName = `Q${q.id}_${inputDef.name}`; // Generate unique name and ID
+        multipleInputHtml += `
+          <div class="input-group-item">
+            <label for="${inputName}">${inputDef.placeholder}:</label>
+            <input type="${inputDef.type}" id="${inputName}" name="${inputName}" placeholder="${inputDef.placeholder}" ${inputDef.pattern ? `pattern="${inputDef.pattern}"` : ''} required />
+          </div>
+        `;
+      });
+      block.innerHTML += multipleInputHtml; // Append the collected HTML
+    } else if (q.type === "checkbox") {
+      q.sections.forEach(section => {
+        const sectionDiv = document.createElement("div");
+        sectionDiv.className = "section";
+        sectionDiv.innerHTML = `<h4>${section.title}</h4>`;
+        section.options.forEach(opt => {
+          sectionDiv.innerHTML += `
+            <label>
+              <input type="radio" name="Q${q.id}_${section.name}" value="${opt}" />
+              ${opt}
+            </label>
+          `;
+        });
+        block.appendChild(sectionDiv);
+      });
+    } else if (q.type === "yes_no_grid") {
+      const gridDiv = document.createElement("div");
+      gridDiv.className = "yes-no-grid";
+
+      const headerDiv = document.createElement("div");
+      headerDiv.className = "grid-header";
+      headerDiv.innerHTML = `
+        <div class="appliance-label">Appliance</div>
+        <div class="yes-no-options">
+          <span>Yes</span>
+          <span>No</span>
+        </div>
+      `;
+      gridDiv.appendChild(headerDiv);
+
+      q.appliances.forEach((appliance, index) => {
+        const rowDiv = document.createElement("div");
+        rowDiv.className = "grid-row";
+
+        const applianceName = appliance.replace(/[^a-zA-Z0-9]/g, '_');
+        rowDiv.innerHTML = `
+          <div class="appliance-name">${String.fromCharCode(65 + index)}. ${appliance}</div>
+          <div class="yes-no-buttons">
+            <label><input type="radio" name="Q${q.id}_${applianceName}" value="Yes" /><span class="radio-custom"></span></label>
+            <label><input type="radio" name="Q${q.id}_${applianceName}" value="No" /><span class="radio-custom"></span></label>
+          </div>
+        `;
+        gridDiv.appendChild(rowDiv);
+
+        if (appliance.includes("Other (please specify)")) {
+          const otherDiv = document.createElement("div");
+          otherDiv.className = "other-input-grid";
+          otherDiv.innerHTML = `<input type="text" name="Q${q.id}_other" placeholder="Please specify..." style="width: calc(100% - 40px);" />`;
+          gridDiv.appendChild(otherDiv);
+        }
+      });
+      block.appendChild(gridDiv);
+    } else if (q.type === "multiple_number") {
+      const inputsDiv = document.createElement("div");
+      inputsDiv.className = "multiple-number-inputs";
+      q.devices.forEach((device, index) => {
+        inputsDiv.innerHTML += `
+          <div class="number-input-row">
+            <div class="device-label">${device.label}</div>
+            <input type="number" name="Q${q.id}_${device.name}" min="0" step="1" required />
+          </div>
+        `;
+      });
+      block.appendChild(inputsDiv);
+    } else if (q.type === "input_group") {
+      q.section.forEach(inputSection => {
+        const inputDiv = document.createElement("div");
+        inputDiv.className = "input-section";
+        inputDiv.innerHTML = `<h4>${inputSection.title}</h4>`;
+        inputDiv.innerHTML += `
+          <input type="${inputSection.inputType}" name="Q${q.id}_${inputSection.name}"
+            placeholder="${inputSection.placeholder || ''}"
+            ${inputSection.min !== undefined ? `min="${inputSection.min}"` : ''}
+            ${inputSection.step !== undefined ? `step="${inputSection.step}"` : ''}
+            ${inputSection.pattern ? `pattern="${inputSection.pattern}"` : ''}
+            required />
+        `;
+        block.appendChild(inputDiv);
+      });
+    } else {
+      // Regular radio button questions
+      q.options.forEach(opt => {
+        block.innerHTML += `
+          <label>
+            <input type="radio" name="Q${q.id}_${q.name}" value="${opt}" />
+            ${opt}
+          </label>
+        `;
+      });
+      if (q.hasOther) {
+        block.innerHTML += `<div class="other-input"><input type="text" name="Q${q.id}_other" placeholder="Please specify..." style="width: calc(100% - 40px);" /></div>`;
+      }
     }
 
-    function getVisibleQuestions() {
-      return questions.filter(q => {
-        if (!q.condition) return true;
-        const answer = formData[`Q${q.condition.questionId}`];
+    questionsDiv.appendChild(block);
+  });
+  updateQuestionVisibility(); // Set initial visibility based on conditions
+}
+    // Function to collect all form data
+    function collectFormData() {
+      const formData = {};
+      const formElements = surveyForm.elements;
 
-        if (q.condition.operator === "greater") {
-          return parseInt(answer) > q.condition.value;
+      for (let i = 0; i < formElements.length; i++) {
+        const element = formElements[i];
+        if (element.name && !element.disabled) { // Only collect data from enabled elements
+          if (element.type === "radio") {
+            if (element.checked) {
+              formData[element.name] = element.value;
+            }
+          } else if (element.type === "checkbox") {
+             // For checkboxes, you might want to collect all checked values as an array
+             // This example assumes unique names for each checkbox choice if multiple selections are truly allowed
+             // For now, it treats them like radio buttons within a section (only one selection)
+             if (element.checked) {
+                formData[element.name] = element.value;
+             }
+          } else if (element.tagName === "INPUT" || element.tagName === "TEXTAREA" || element.tagName === "SELECT") {
+            formData[element.name] = element.value;
+          }
         }
-        return answer === q.condition.value;
+      }
+      return formData;
+    }
+
+    // Function to update visibility of conditional questions
+    function updateQuestionVisibility() {
+      const currentAnswers = collectFormData(); // Get current state of answers
+
+      questions.forEach(q => {
+        const questionBlock = document.querySelector(`[data-question-id="${q.id}"]`);
+        if (!questionBlock) return; // Should not happen if all questions are rendered
+
+        if (q.condition) {
+          const conditionQuestionId = q.condition.questionId;
+          const conditionValue = q.condition.value;
+          const conditionOperator = q.condition.operator;
+
+          // Find the name of the input for the condition question
+          let conditionInputName;
+          const conditionQuestionDef = questions.find(item => item.id === conditionQuestionId);
+
+          if (conditionQuestionDef) {
+            if (conditionQuestionDef.input === "number" || conditionQuestionDef.input === "text") {
+              conditionInputName = `Q${conditionQuestionDef.id}_${conditionQuestionDef.name}`;
+            } else if (conditionQuestionDef.input === "multiple") {
+                 // For multiple inputs, assume the condition applies to the first one or a specific one
+                 // For Q0.1 (city and pincode), we don't expect it to control other questions in this way,
+                 // but if it did, you'd need to specify which input in 'inputs' array
+                 // For simplicity, let's assume conditions don't typically rely on multiple inputs unless specified
+            } else { // Radio buttons, checkbox sections
+              conditionInputName = `Q${conditionQuestionDef.id}_${conditionQuestionDef.name}`;
+            }
+          }
+
+          const answerForCondition = currentAnswers[conditionInputName];
+          let shouldBeVisible = false;
+
+          if (conditionOperator === "greater") {
+            shouldBeVisible = parseInt(answerForCondition) > conditionValue;
+          } else {
+            shouldBeVisible = answerForCondition === conditionValue;
+          }
+
+          if (shouldBeVisible) {
+            questionBlock.style.display = 'block';
+            // Enable all inputs within this block
+            questionBlock.querySelectorAll('input, select, textarea').forEach(input => {
+              input.removeAttribute('disabled');
+            });
+          } else {
+            questionBlock.style.display = 'none';
+            // Disable all inputs within this block and clear their values
+            questionBlock.querySelectorAll('input, select, textarea').forEach(input => {
+              input.setAttribute('disabled', 'true');
+              if (input.type === 'radio' || input.type === 'checkbox') {
+                input.checked = false; // Uncheck
+              } else {
+                input.value = ''; // Clear text/number inputs
+              }
+            });
+          }
+        } else {
+          // Always show questions without conditions
+          questionBlock.style.display = 'block';
+          questionBlock.querySelectorAll('input, select, textarea').forEach(input => {
+              input.removeAttribute('disabled'); // Ensure non-conditional inputs are enabled
+          });
+        }
       });
     }
 
-    function renderQuestion() {
-      const visibleQuestions = getVisibleQuestions();
-      // If there are no questions to display (e.g., after successful submission)
-      if (visibleQuestions.length === 0 || currentIndex >= visibleQuestions.length) {
-        questionsDiv.innerHTML = ""; // Clear the questions section
-        nextBtn.style.display = "none";
-        backBtn.style.display = "none";
-        submitBtn.style.display = "none";
-        progressFill.style.width = "0%"; // Reset progress bar
-        return; // Exit the function
+    // Add event listeners to all relevant inputs for real-time visibility updates
+    questionsDiv.addEventListener('change', (event) => {
+      // Check if the changed element's name matches a question ID used in a condition
+      // This is a simplified check; a more robust solution might map input names to question IDs
+      const changedQuestionIdMatch = event.target.name.match(/^Q(\d+(\.\d+)?)/);
+      if (changedQuestionIdMatch) {
+        updateQuestionVisibility();
       }
+    });
 
-      const q = visibleQuestions[currentIndex];
-      questionsDiv.innerHTML = "";
 
-      const block = document.createElement("div");
-      block.className = "question-block";
-      const questionText = document.createElement("div");
-      questionText.className = "question-text";
-      questionText.textContent = q.text;
-      block.appendChild(questionText);
+    // Event listener for Reset button
+    resetBtn.addEventListener("click", () => {
+      surveyForm.reset(); // Resets all form fields
+      updateQuestionVisibility(); // Reset visibility for conditional questions
+      statusDiv.textContent = ""; // Clear status message
+      statusDiv.style.color = ""; // Reset status color
+    });
 
-      if (q.input === "number") {
-        const input = document.createElement("input");
-        input.type = "number";
-        input.name = `q${q.id}`;
-        input.value = formData[`Q${q.id}`] || "";
-        input.placeholder = q.placeholder || "";
-        input.required = true;
-        input.min = "0";
-        block.appendChild(input);
-      } else if (q.type === "checkbox") {
-        // Handle multi-section checkbox questions
-        q.sections.forEach(section => {
-          const sectionDiv = document.createElement("div");
-          sectionDiv.className = "section";
+    // Event listener for form submission
+    surveyForm.addEventListener("submit", async function (event) {
+      event.preventDefault(); // Prevent default form submission
 
-          const sectionTitle = document.createElement("h4");
-          sectionTitle.textContent = section.title;
-          sectionDiv.appendChild(sectionTitle);
+      statusDiv.textContent = ""; // Clear previous status messages
+      statusDiv.style.color = ""; // Reset color
 
-          section.options.forEach(opt => {
-            const inputId = `q${q.id}_${section.title.replace(/[^a-zA-Z0-9]/g, '_')}_${opt.replace(/\s+/g, '_')}`;
-            const label = document.createElement("label");
-            label.htmlFor = inputId;
-            label.innerHTML = `
-              <input type="radio" id="${inputId}" name="q${q.id}_${section.title.replace(/[^a-zA-Z0-9]/g, '_')}" value="${opt}"
-                ${formData[`Q${q.id}_${section.title}`] === opt ? 'checked' : ''} />
-              ${opt}
-            `;
-            sectionDiv.appendChild(label);
-          });
+      // Client-side validation for all currently visible fields
+      const allInputs = surveyForm.querySelectorAll('input:not([disabled]), select:not([disabled]), textarea:not([disabled])');
+      let formIsValid = true;
+      let firstInvalidElement = null;
 
-          block.appendChild(sectionDiv);
-        });
-      } else if (q.type === "yes_no_grid") {
-        // Handle Yes/No grid questions for appliances
-        const gridDiv = document.createElement("div");
-        gridDiv.className = "yes-no-grid";
-
-        // Create header row
-        const headerDiv = document.createElement("div");
-        headerDiv.className = "grid-header";
-        headerDiv.innerHTML = `
-          <div class="appliance-label">Appliance</div>
-          <div class="yes-no-options">
-            <span>Yes</span>
-            <span>No</span>
-          </div>
-        `;
-        gridDiv.appendChild(headerDiv);
-
-        q.appliances.forEach((appliance, index) => {
-          const rowDiv = document.createElement("div");
-          rowDiv.className = "grid-row";
-
-          const applianceLabel = document.createElement("div");
-          applianceLabel.className = "appliance-name";
-          applianceLabel.textContent = `${String.fromCharCode(65 + index)}. ${appliance}`;
-          rowDiv.appendChild(applianceLabel);
-
-          const optionsDiv = document.createElement("div");
-          optionsDiv.className = "yes-no-buttons";
-
-          ["Yes", "No"].forEach(option => {
-            const inputId = `q${q.id}_${appliance.replace(/[^a-zA-Z0-9]/g, '_')}_${option}`;
-            const label = document.createElement("label");
-            label.htmlFor = inputId;
-            label.innerHTML = `
-              <input type="radio" id="${inputId}" name="q${q.id}_${appliance.replace(/[^a-zA-Z0-9]/g, '_')}" value="${option}"
-                ${formData[`Q${q.id}_${appliance}`] === option ? 'checked' : ''} />
-              <span class="radio-custom"></span>
-            `;
-            optionsDiv.appendChild(label);
-          });
-
-          rowDiv.appendChild(optionsDiv);
-          gridDiv.appendChild(rowDiv);
-
-          // Add "Other" text input if this is the "Other" appliance
-          if (appliance === "Other (please specify)") {
-            const otherDiv = document.createElement("div");
-            otherDiv.className = "other-input-grid";
-            otherDiv.innerHTML = `
-              <input type="text" id="q${q.id}_other_text" name="q${q.id}_other"
-                placeholder="Please specify..."
-                value="${formData[`Q${q.id}_other`] || ''}"
-                style="margin-left: 20px; margin-top: 5px; width: 200px;" />
-            `;
-            gridDiv.appendChild(otherDiv);
-          }
-        });
-
-        block.appendChild(gridDiv);
-      } else if (q.type === "multiple_number") {
-        // Handle multiple number input questions (like Q88)
-        const inputsDiv = document.createElement("div");
-        inputsDiv.className = "multiple-number-inputs";
-
-        q.devices.forEach((device, index) => {
-          const rowDiv = document.createElement("div");
-          rowDiv.className = "number-input-row";
-
-          const label = document.createElement("div");
-          label.className = "device-label";
-          label.textContent = device;
-          rowDiv.appendChild(label);
-
-          const input = document.createElement("input");
-          input.type = "number";
-          input.name = `q${q.id}_${index}`;
-          input.value = formData[`Q${q.id}_${index}`] || "";
-          input.min = "0";
-          input.required = true;
-          rowDiv.appendChild(input);
-
-          inputsDiv.appendChild(rowDiv);
-        });
-
-        block.appendChild(inputsDiv);
-      } else if (q.type === "input") {
-        // Handle multiple input questions like Q114, Q182, Q184
-        q.section.forEach((inputSection, index) => {
-          const inputDiv = document.createElement("div");
-          inputDiv.className = "input-section";
-
-          const title = document.createElement("h4");
-          title.textContent = inputSection.title;
-          inputDiv.appendChild(title);
-
-          const input = document.createElement("input");
-          input.type = inputSection.inputType;
-          input.name = `q${q.id}_${index}`;
-          input.value = formData[`Q${q.id}_${index}`] || "";
-          input.placeholder = inputSection.placeholder || "";
-          input.required = true;
-          if (inputSection.inputType === "number") {
-            input.min = "0";
-          }
-          inputDiv.appendChild(input);
-          block.appendChild(inputDiv);
-        });
-      } else {
-        // Regular radio button questions
-        q.options.forEach(opt => {
-          const inputId = `q${q.id}_${opt.replace(/\s+/g, '_')}`;
-          const label = document.createElement("label");
-          label.htmlFor = inputId;
-          label.innerHTML = `
-            <input type="radio" id="${inputId}" name="q${q.id}" value="${opt}"
-              ${formData[`Q${q.id}`] === opt ? 'checked' : ''} />
-            ${opt}
-          `;
-          block.appendChild(label);
-        });
-
-        // Add "Other (please specify)" text input if question has hasOther property
-        if (q.hasOther) {
-          const otherDiv = document.createElement("div");
-          otherDiv.className = "other-input";
-          otherDiv.innerHTML = `
-            <input type="text" id="q${q.id}_other_text" name="q${q.id}_other"
-              placeholder="Please specify..."
-              value="${formData[`Q${q.id}_other`] || ''}"
-              style="margin-left: 20px; margin-top: 5px; width: 200px;" />
-          `;
-          block.appendChild(otherDiv);
-        }
-      }
-
-      questionsDiv.appendChild(block);
-
-      backBtn.style.display = currentIndex === 0 ? "none" : "inline-block";
-      nextBtn.style.display = currentIndex < visibleQuestions.length - 1 ? "inline-block" : "none";
-      submitBtn.style.display = currentIndex === visibleQuestions.length - 1 ? "inline-block" : "none";
-
-      updateProgress();
-    }
-
-    function saveAnswer() {
-      const visibleQuestions = getVisibleQuestions();
-      if (visibleQuestions.length === 0 || currentIndex >= visibleQuestions.length) {
-        return; // No question to save an answer for
-      }
-      const q = visibleQuestions[currentIndex];
-
-      if (q.input === "number") {
-        const input = document.querySelector(`input[name="q${q.id}"]`);
-        if (input) {
-          formData[`Q${q.id}`] = input.value;
-        }
-      } else if (q.type === "checkbox") {
-        // Save answers for multi-section questions
-        q.sections.forEach(section => {
-          const selected = document.querySelector(`input[name="q${q.id}_${section.title.replace(/[^a-zA-Z0-9]/g, '_')}"]:checked`);
-          if (selected) {
-            formData[`Q${q.id}_${section.title}`] = selected.value;
-          } else {
-            delete formData[`Q${q.id}_${section.title}`]; // Clear if not selected
-          }
-        });
-      } else if (q.type === "yes_no_grid") {
-        q.appliances.forEach(appliance => {
-          const selected = document.querySelector(`input[name="q${q.id}_${appliance.replace(/[^a-zA-Z0-9]/g, '_')}"]:checked`);
-          if (selected) {
-            formData[`Q${q.id}_${appliance}`] = selected.value;
-          } else {
-            delete formData[`Q${q.id}_${appliance}`]; // Clear if not selected
-          }
-        });
-        if (q.hasOther) {
-          const otherInput = document.getElementById(`q${q.id}_other_text`);
-          if (otherInput && otherInput.value) {
-            formData[`Q${q.id}_other`] = otherInput.value;
-          } else {
-            delete formData[`Q${q.id}_other`];
-          }
-        }
-      } else if (q.type === "multiple_number") {
-        q.devices.forEach((device, index) => {
-          const input = document.querySelector(`input[name="q${q.id}_${index}"]`);
-          if (input) {
-            formData[`Q${q.id}_${index}`] = input.value;
-          } else {
-            delete formData[`Q${q.id}_${index}`];
-          }
-        });
-      } else if (q.type === "input") {
-        q.section.forEach((inputSection, index) => {
-          const input = document.querySelector(`input[name="q${q.id}_${index}"]`);
-          if (input) {
-            formData[`Q${q.id}_${index}`] = input.value;
-          } else {
-            delete formData[`Q${q.id}_${index}`];
-          }
-        });
-      } else {
-        // For regular radio buttons
-        const selected = document.querySelector(`input[name="q${q.id}"]:checked`);
-        if (selected) {
-          formData[`Q${q.id}`] = selected.value;
-        } else {
-          delete formData[`Q${q.id}`]; // Clear if nothing is selected
+      allInputs.forEach(input => {
+        // Clear previous error messages for this input
+        const existingError = input.nextElementSibling;
+        if (existingError && existingError.classList.contains('error-message')) {
+          existingError.remove();
         }
 
-        // For "Other (please specify)" text input associated with radio buttons
-        if (q.hasOther) {
-          const otherInput = document.getElementById(`q${q.id}_other_text`);
-          if (otherInput && otherInput.value) {
-            formData[`Q${q.id}_other`] = otherInput.value;
-          } else {
-            delete formData[`Q${q.id}_other`];
+        // Specific validation for number types
+        if (input.type === 'number') {
+            const numVal = parseFloat(input.value);
+            if (isNaN(numVal) && input.hasAttribute('required') && input.value.trim() === "") {
+                formIsValid = false;
+                if (!firstInvalidElement) firstInvalidElement = input;
+                displayError(input, 'Please enter a number.');
+            } else if (input.min && numVal < parseFloat(input.min)) {
+                formIsValid = false;
+                if (!firstInvalidElement) firstInvalidElement = input;
+                displayError(input, `Value must be at least ${input.min}.`);
+            } else if (input.step && (numVal % parseFloat(input.step) !== 0)) {
+                // Basic step validation for whole numbers where step is '1'
+                if (input.step === '1' && !Number.isInteger(numVal)) {
+                    formIsValid = false;
+                    if (!firstInvalidElement) firstInvalidElement = input;
+                    displayError(input, 'Please enter a whole number.');
+                }
+            }
+        }
+        // Specific validation for text inputs with patterns (e.g., pincode)
+        else if (input.type === 'text' && input.pattern) {
+          const regex = new RegExp(input.pattern);
+          if (input.value.trim() === "" && input.hasAttribute('required')) {
+            formIsValid = false;
+            if (!firstInvalidElement) firstInvalidElement = input;
+            displayError(input, 'This field is required.');
+          } else if (!regex.test(input.value)) {
+            formIsValid = false;
+            if (!firstInvalidElement) firstInvalidElement = input;
+            // Find the original question definition to get specific validation message
+            const questionIdMatch = input.name.match(/^Q(\d+(\.\d+)?)/);
+            if (questionIdMatch) {
+                const questionDef = questions.find(q => q.id == parseFloat(questionIdMatch[1]));
+                if (questionDef && questionDef.input === 'multiple') {
+                    const inputDef = questionDef.inputs.find(i => `Q${questionDef.id}_${i.name}` === input.name);
+                    displayError(input, inputDef.validationMessage || 'Invalid format.');
+                } else {
+                    displayError(input, 'Invalid format.');
+                }
+            } else {
+                displayError(input, 'Invalid format.');
+            }
           }
         }
-      }
-      console.log("Current formData:", formData);
-    }
+        // General required validation for other types (radio, select, etc.)
+        else if (input.hasAttribute('required') && input.value.trim() === "") {
+            // For radio buttons, check if at least one in the group is checked
+            if (input.type === 'radio') {
+                const radioGroup = document.querySelectorAll(`input[name="${input.name}"]:checked`);
+                if (radioGroup.length === 0) {
+                    formIsValid = false;
+                    if (!firstInvalidElement) firstInvalidElement = input;
+                    // Only display error once per radio group
+                    if (!input.closest('.question-block').querySelector('.error-message')) {
+                      displayError(input.closest('.question-block').querySelector('.question-text'), 'Please select an option.', true);
+                    }
+                }
+            } else {
+              formIsValid = false;
+              if (!firstInvalidElement) firstInvalidElement = input;
+              displayError(input, 'This field is required.');
+            }
+        }
+      });
 
-    function goToNextQuestion() {
-      saveAnswer();
-      const visibleQuestions = getVisibleQuestions();
-      if (currentIndex < visibleQuestions.length - 1) {
-        currentIndex++;
-        renderQuestion();
-      }
-    }
-
-    function goToPreviousQuestion() {
-      saveAnswer();
-      if (currentIndex > 0) {
-        currentIndex--;
-        // Recalculate visible questions as previous answers might change visibility
-        renderQuestion();
-      }
-    }
-
-    nextBtn.addEventListener("click", goToNextQuestion);
-    backBtn.addEventListener("click", goToPreviousQuestion);
-
-    document.getElementById("surveyForm").addEventListener("submit", async function (event) {
-      event.preventDefault();
-      saveAnswer(); // Save the answer for the current question before submitting
-      
-      if (!validateForm()) {
+      if (!formIsValid) {
+        statusDiv.textContent = "Please correct the errors in the form.";
+        statusDiv.style.color = "red";
+        if (firstInvalidElement) {
+            firstInvalidElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
         return; // Stop submission if validation fails
       }
 
-      const statusDiv = document.getElementById("status");
+      // If validation passes, proceed with submission
       statusDiv.textContent = "Submitting survey...";
       statusDiv.style.color = "blue";
+
+       history.replaceState(null, '', '/');
+
+      const formData = collectFormData();
+      console.log("Collected FormData:", formData);
 
       try {
         const response = await fetch("/api/submit-survey", {
@@ -875,88 +1044,35 @@
           body: JSON.stringify(formData),
         });
 
-        const result = await response.json();
-
         if (response.ok) {
-          statusDiv.textContent = result.message;
-          statusDiv.style.color = "green";
-
-          // Clear the form and hide question-related elements
-          document.getElementById("surveyForm").reset();
-          currentIndex = 0; // Reset to the first question logic (though not rendered immediately)
-          for (const key in formData) { // Clear formData object
-            delete formData[key];
-          }
-
-          // Clear the questions section and hide navigation buttons/progress bar
-          questionsDiv.innerHTML = "";
-          nextBtn.style.display = "none";
-          backBtn.style.display = "none";
-          submitBtn.style.display = "none";
-          progressFill.style.width = "0%"; // Reset progress bar
-          document.querySelector('.progress-bar').style.display = 'none'; // Hide the progress bar container
-          document.querySelector('h2').style.display = 'none'; // Optionally hide the title
-
+          // On successful submission, redirect to the thank you page
+          window.location.href = "/thankyou.html";
         } else {
+          const result = await response.json(); // Get error details from server
           statusDiv.textContent = `Error: ${result.error || "Unknown error"}`;
           statusDiv.style.color = "red";
-          // If there's an error, you might want to keep the form visible or guide the user
-          // For now, we'll just show the error message.
         }
       } catch (error) {
-        console.error("Network error:", error);
-        statusDiv.textContent = "Network error. Please try again.";
+        console.error("Network error or submission error:", error);
+        statusDiv.textContent = "Network error or submission failed. Please try again.";
         statusDiv.style.color = "red";
       }
     });
 
-    function validateForm() {
-      const statusDiv = document.getElementById("status");
-      const visibleQuestions = getVisibleQuestions();
-      const missingQuestions = [];
-
-      visibleQuestions.forEach((question, index) => {
-        let hasAnswer = false;
-
-        if (question.input === "number") {
-          hasAnswer = formData[`Q${question.id}`] && formData[`Q${question.id}`].trim() !== "";
-        } else if (question.type === "checkbox") {
-          hasAnswer = question.sections.some(section => 
-            formData[`Q${question.id}_${section.title}`]
-          );
-        } else if (question.type === "yes_no_grid") {
-          hasAnswer = question.appliances.some(appliance => 
-            formData[`Q${question.id}_${appliance}`]
-          );
-        } else if (question.type === "multiple_number") {
-          hasAnswer = question.devices.some((device, deviceIndex) => 
-            formData[`Q${question.id}_${deviceIndex}`] && formData[`Q${question.id}_${deviceIndex}`].trim() !== ""
-          );
-        } else if (question.type === "input") {
-          hasAnswer = question.section.some((inputSection, sectionIndex) => 
-            formData[`Q${question.id}_${sectionIndex}`] && formData[`Q${question.id}_${sectionIndex}`].trim() !== ""
-          );
-        } else {
-          hasAnswer = formData[`Q${question.id}`];
-        }
-
-        if (!hasAnswer) {
-          missingQuestions.push(index + 1); // Question number (1-based)
-        }
-      });
-
-      if (missingQuestions.length > 0) {
-        statusDiv.textContent = `Please answer all questions. Missing: Question ${missingQuestions.join(', ')}`;
-        statusDiv.style.color = "red";
-        return false;
+    function displayError(inputElement, message, afterElement = false) {
+      const errorDiv = document.createElement('div');
+      errorDiv.className = 'error-message';
+      errorDiv.textContent = message;
+      if (afterElement) {
+        inputElement.parentNode.insertBefore(errorDiv, inputElement.nextSibling);
+      } else {
+        inputElement.parentNode.insertBefore(errorDiv, inputElement.nextSibling);
       }
-
-      statusDiv.textContent = "";
-      return true;
     }
 
-    // Initial render
-    renderQuestion();
+
+    // Initial render of all questions
+    renderAllQuestions();
   </script>
 </body>
 </html>
