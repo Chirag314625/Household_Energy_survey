@@ -18,6 +18,10 @@
     </style>
 </head>
 <body>
+    <div class="language-selector-container">
+        <div id="google_translate_element"></div>
+    </div>
+
     <div class="bg-particles">
         <div class="particle"></div>
         <div class="particle"></div>
@@ -35,7 +39,6 @@
             <h1>Energy Consumption Survey</h1>
             <p class="description">
                 We hope you enjoy completing this questionnaire and greatly appreciate your help in understanding how energy is consumed in households across India.
-
             </p>
 
             <div class="features">
@@ -68,8 +71,6 @@
     </div>
 
     <script>
-        // REMOVED: The startSurvey() function is no longer needed for navigation
-
         // Add a pageshow listener to handle back/forward cache
         window.addEventListener('pageshow', function(event) {
             // Ensure the body is visible whether it's a fresh load or from bfcache
@@ -106,5 +107,15 @@
             });
         });
     </script>
+
+    <script type="text/javascript">
+        function googleTranslateElementInit() {
+            new google.translate.TranslateElement(
+                { pageLanguage: 'en', includedLanguages: 'en,hi,gu,bn,ta,te,ml,kn,pa,mr', layout: google.translate.TranslateElement.InlineLayout.SIMPLE },
+                'google_translate_element'
+            );
+        }
+    </script>
+    <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 </body>
 </html>

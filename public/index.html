@@ -2,11 +2,26 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Survey Form</title>
-  <link rel="stylesheet" href="styles.css" />
+  <title>Residential Energy Consumption Survey</title>
+  <meta name="google" content="notranslate">
+  <meta http-equiv="Content-Language" content="en"> 
   
+  <link rel="stylesheet" href="styles.css" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"> 
 </head>
 <body>
+  <div class="language-selector-container">
+    <div id="google_translate_element"></div>
+  </div>
+
+  <div class="bg-particles">
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+  </div>
+
   <div class="form-container">
     <h2>Residential Energy Consumption Survey</h2>
     <form id="surveyForm">
@@ -23,6 +38,29 @@
   </div>
 
   <script>
+    window.addEventListener('pageshow', function(event) {
+      document.body.style.opacity = '1';
+      document.body.style.transition = 'opacity 0.5s ease-in';
+      document.body.classList.add('loaded');
+    });
+
+    document.addEventListener('DOMContentLoaded', function() {
+      document.body.classList.add('loaded');
+      // Add any page-specific JS here, like form validation etc.
+    });
+  </script>
+
+  <script type="text/javascript">
+    function googleTranslateElementInit() {
+      new google.translate.TranslateElement(
+        { pageLanguage: 'en', includedLanguages: 'en,hi,gu,bn,ta,te,ml,kn,pa,mr', layout: google.translate.TranslateElement.InlineLayout.SIMPLE },
+        'google_translate_element'
+      );
+    }
+  </script>
+  <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+  
+  <script>
     const questions = [
       // General & Household Demographics
       {
@@ -37,8 +75,8 @@
         text: "What is your city and pincode?",
         input: "multiple",
         inputs: [
-          { name: "city", placeholder: "City", type: "text" },
-          { name: "pincode", placeholder: "Pincode", type: "text", pattern: "^\\d{6}$", validationMessage: "Please enter a valid 6-digit numeric Pincode." }
+          { name: "City/ Village", placeholder: "City", type: "text" },
+          { name: "Pincode", placeholder: "Pincode", type: "text", pattern: "^\\d{6}$", validationMessage: "Please enter a valid 6-digit numeric Pincode." }
         ]
       },
       {
@@ -480,14 +518,10 @@
 
       // Water Heating
       {
-        id: 120,
-        text: "Where is the main water heating equipment for your home located? ",
-        options: [
-          "Inside my home or garage",
-          "Outside my home/garage (for example: in the basement of an apartment building)",
-          "Other (please specify)"
-        ], hasOther: true,
-        name: "water_heater_location"
+        id: 118,
+        text: "Does your home have a water heater?",
+        options: ["Yes", "No"], 
+        name: "has_water_heater"
       },
       {
         id: 121,
@@ -499,6 +533,7 @@
             "Tankless (instant/on-demand)",
             "Don't know"
         ],
+        condition: { questionId: 118, value: "Yes" },
         name: "water_heater_size"
       },
       {
@@ -513,6 +548,7 @@
           "20 or more years old",
           "Don't know"
         ],
+        condition: { questionId: 118, value: "Yes" },
         name: "water_heater_age"
       },
       {
@@ -527,6 +563,7 @@
           "Don't know",
           "Other (please specify)"
         ],hasOther: true,
+        condition: { questionId: 118, value: "Yes" },
         name: "water_heater_fuel"
       },
 
@@ -568,7 +605,7 @@
 
       // Energy Payment & Generation
       {
-        id: 142,
+        id : 142,
         text:"Which of the following describes who is responsible for paying for the electricity used in this home?",
         options: [
           "Household is responsible for paying for all electricity used in this home",
@@ -796,7 +833,8 @@
         if (appliance.includes("Other (please specify)")) {
           const otherDiv = document.createElement("div");
           otherDiv.className = "other-input-grid";
-          otherDiv.innerHTML = `<input type="text" name="Q${q.id}_other" placeholder="Please specify..." style="width: calc(100% - 40px);" />`;
+          // Make 'other' input conditional to the 'Yes' or 'No' selection
+          otherDiv.innerHTML = `<input type="text" name="Q${q.id}_${applianceName}_other" placeholder="Please specify..." style="width: calc(100% - 40px);" disabled />`;
           gridDiv.appendChild(otherDiv);
         }
       });
@@ -839,7 +877,8 @@
         `;
       });
       if (q.hasOther) {
-        block.innerHTML += `<div class="other-input"><input type="text" name="Q${q.id}_other" placeholder="Please specify..." style="width: calc(100% - 40px);" /></div>`;
+        // Make 'other' input conditional to the 'Other (please specify)' selection
+        block.innerHTML += `<div class="other-input"><input type="text" name="Q${q.id}_other" placeholder="Please specify..." style="width: calc(100% - 40px);" disabled /></div>`;
       }
     }
 
@@ -874,7 +913,7 @@
       return formData;
     }
 
-    // Function to update visibility of conditional questions
+    // Function to update visibility of conditional questions and 'other' inputs
     function updateQuestionVisibility() {
       const currentAnswers = collectFormData(); // Get current state of answers
 
@@ -882,24 +921,24 @@
         const questionBlock = document.querySelector(`[data-question-id="${q.id}"]`);
         if (!questionBlock) return; // Should not happen if all questions are rendered
 
+        // Handle conditional question visibility
         if (q.condition) {
           const conditionQuestionId = q.condition.questionId;
           const conditionValue = q.condition.value;
           const conditionOperator = q.condition.operator;
 
-          // Find the name of the input for the condition question
           let conditionInputName;
           const conditionQuestionDef = questions.find(item => item.id === conditionQuestionId);
 
           if (conditionQuestionDef) {
+            // Adjust for single inputs vs. multiple inputs in the condition
             if (conditionQuestionDef.input === "number" || conditionQuestionDef.input === "text") {
               conditionInputName = `Q${conditionQuestionDef.id}_${conditionQuestionDef.name}`;
             } else if (conditionQuestionDef.input === "multiple") {
-                 // For multiple inputs, assume the condition applies to the first one or a specific one
-                 // For Q0.1 (city and pincode), we don't expect it to control other questions in this way,
-                 // but if it did, you'd need to specify which input in 'inputs' array
-                 // For simplicity, let's assume conditions don't typically rely on multiple inputs unless specified
-            } else { // Radio buttons, checkbox sections
+                // If a condition relied on a specific sub-input of a 'multiple' type,
+                // you'd need to specify which one here. For now, assuming direct name if applicable.
+                conditionInputName = `Q${conditionQuestionDef.id}_${conditionQuestionDef.inputs[0].name}`; // Default to first input for multi
+            } else {
               conditionInputName = `Q${conditionQuestionDef.id}_${conditionQuestionDef.name}`;
             }
           }
@@ -915,19 +954,17 @@
 
           if (shouldBeVisible) {
             questionBlock.style.display = 'block';
-            // Enable all inputs within this block
             questionBlock.querySelectorAll('input, select, textarea').forEach(input => {
               input.removeAttribute('disabled');
             });
           } else {
             questionBlock.style.display = 'none';
-            // Disable all inputs within this block and clear their values
             questionBlock.querySelectorAll('input, select, textarea').forEach(input => {
               input.setAttribute('disabled', 'true');
               if (input.type === 'radio' || input.type === 'checkbox') {
-                input.checked = false; // Uncheck
+                input.checked = false;
               } else {
-                input.value = ''; // Clear text/number inputs
+                input.value = '';
               }
             });
           }
@@ -935,9 +972,47 @@
           // Always show questions without conditions
           questionBlock.style.display = 'block';
           questionBlock.querySelectorAll('input, select, textarea').forEach(input => {
-              input.removeAttribute('disabled'); // Ensure non-conditional inputs are enabled
+              input.removeAttribute('disabled');
           });
         }
+
+        // Handle "Other (please specify)" input visibility
+        if (q.hasOther) {
+            const otherInput = questionBlock.querySelector(`input[name="Q${q.id}_other"]`);
+            if (otherInput) {
+                const selectedOption = questionBlock.querySelector(`input[name="Q${q.id}_${q.name}"]:checked`);
+                if (selectedOption && selectedOption.value.includes("Other (please specify)")) {
+                    otherInput.removeAttribute('disabled');
+                    otherInput.setAttribute('required', 'true'); // Make required when visible
+                } else {
+                    otherInput.setAttribute('disabled', 'true');
+                    otherInput.removeAttribute('required');
+                    otherInput.value = ''; // Clear value when hidden
+                }
+            }
+        }
+        // Handle "Other (please specify)" for yes_no_grid
+        if (q.type === "yes_no_grid") {
+            q.appliances.forEach(appliance => {
+                if (appliance.includes("Other (please specify)")) {
+                    const applianceName = appliance.replace(/[^a-zA-Z0-9]/g, '_');
+                    const otherRadio = questionBlock.querySelector(`input[name="Q${q.id}_${applianceName}"][value="Yes"]`); // Assuming "Other" implies "Yes"
+                    const otherInput = questionBlock.querySelector(`input[name="Q${q.id}_${applianceName}_other"]`);
+
+                    if (otherRadio && otherInput) {
+                        if (otherRadio.checked) {
+                            otherInput.removeAttribute('disabled');
+                            otherInput.setAttribute('required', 'true');
+                        } else {
+                            otherInput.setAttribute('disabled', 'true');
+                            otherInput.removeAttribute('required');
+                            otherInput.value = '';
+                        }
+                    }
+                }
+            });
+        }
+
       });
     }
 
@@ -990,12 +1065,14 @@
                 formIsValid = false;
                 if (!firstInvalidElement) firstInvalidElement = input;
                 displayError(input, `Value must be at least ${input.min}.`);
-            } else if (input.step && (numVal % parseFloat(input.step) !== 0)) {
-                // Basic step validation for whole numbers where step is '1'
-                if (input.step === '1' && !Number.isInteger(numVal)) {
+            } else if (input.step && input.step !== "any") { // Improved step validation
+                const step = parseFloat(input.step);
+                // To avoid floating point issues, scale to integers for modulo check
+                const precision = (step.toString().split('.')[1] || '').length;
+                if (Math.abs((numVal * (10**precision)) % (step * (10**precision))) > 1e-9) { // Using a small epsilon
                     formIsValid = false;
                     if (!firstInvalidElement) firstInvalidElement = input;
-                    displayError(input, 'Please enter a whole number.');
+                    displayError(input, `Value must be a multiple of ${input.step}.`);
                 }
             }
         }
@@ -1012,7 +1089,7 @@
             // Find the original question definition to get specific validation message
             const questionIdMatch = input.name.match(/^Q(\d+(\.\d+)?)/);
             if (questionIdMatch) {
-                const questionDef = questions.find(q => q.id == parseFloat(questionIdMatch[1]));
+                const questionDef = questions.find(q => q.id.toString() === questionIdMatch[1]); // FIX: Use toString() for robust comparison
                 if (questionDef && questionDef.input === 'multiple') {
                     const inputDef = questionDef.inputs.find(i => `Q${questionDef.id}_${i.name}` === input.name);
                     displayError(input, inputDef.validationMessage || 'Invalid format.');
@@ -1034,7 +1111,8 @@
                     if (!firstInvalidElement) firstInvalidElement = input;
                     // Only display error once per radio group
                     if (!input.closest('.question-block').querySelector('.error-message')) {
-                      displayError(input.closest('.question-block').querySelector('.question-text'), 'Please select an option.', true);
+                      // FIX: Place error after the question block itself for radio groups
+                      displayError(input.closest('.question-block'), 'Please select an option.', true);
                     }
                 }
             } else {
@@ -1058,7 +1136,7 @@
       statusDiv.textContent = "Submitting survey...";
       statusDiv.style.color = "blue";
 
-       history.replaceState(null, '', '/');
+      // history.replaceState(null, '', '/'); // Consider if this is always desired
 
       const formData = collectFormData();
       console.log("Collected FormData:", formData);
@@ -1087,14 +1165,18 @@
       }
     });
 
-    function displayError(inputElement, message, afterElement = false) {
+    // FIX: Modified displayError to allow inserting before or after, and better placement for radio errors
+    function displayError(element, message, afterElement = false) {
       const errorDiv = document.createElement('div');
       errorDiv.className = 'error-message';
       errorDiv.textContent = message;
+
       if (afterElement) {
-        inputElement.parentNode.insertBefore(errorDiv, inputElement.nextSibling);
+        // Insert after the target element's last child if it's a block, or after the element itself
+        element.appendChild(errorDiv);
       } else {
-        inputElement.parentNode.insertBefore(errorDiv, inputElement.nextSibling);
+        // Default: Insert after the element
+        element.parentNode.insertBefore(errorDiv, element.nextSibling);
       }
     }
 

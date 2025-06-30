@@ -452,3 +452,93 @@ h1 {
     padding: 1.5rem;
   }
 }
+
+/* Language Selector Button Styling */
+.language-selector-container {
+    position: absolute;
+    top: 20px; /* Adjust as needed */
+    right: 20px; /* Adjust as needed */
+    z-index: 999;
+    background-color: rgba(255, 255, 255, 0.2); /* Slightly transparent background */
+    backdrop-filter: blur(5px); /* Frosted glass effect */
+    border-radius: 8px;
+    padding: 8px 12px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    display: flex; /* To center the dropdown */
+    align-items: center;
+    justify-content: center;
+    overflow: hidden; /* Hide overflow of the Google Translate elements */
+}
+
+.language-selector-container:hover {
+    background-color: rgba(255, 255, 255, 0.3);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+}
+
+/* Specific styling for Google Translate elements inside the container */
+#google_translate_element {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Modern font */
+    font-size: 14px;
+    color: #333; /* Darker text for readability */
+}
+
+/* Target the specific Google Translate select box */
+.goog-te-gadget-simple {
+    background-color: transparent !important; /* Make background transparent */
+    border: none !important; /* Remove border */
+    padding: 0 !important; /* Remove default padding */
+    font-size: inherit !important;
+    font-family: inherit !important;
+    color: inherit !important;
+    box-shadow: none !important; /* Remove any box shadow */
+    cursor: pointer;
+    vertical-align: middle; /* Align nicely with text */
+    line-height: normal !important; /* Ensure proper line height */
+}
+
+.goog-te-gadget-simple select {
+    background-color: transparent !important;
+    border: none !important;
+    padding: 0 !important;
+    font-size: inherit !important;
+    font-family: inherit !important;
+    color: inherit !important;
+    cursor: pointer;
+    -webkit-appearance: none; /* Remove default dropdown arrow for custom styling */
+    -moz-appearance: none;
+    appearance: none;
+    width: auto; /* Allow select to take natural width */
+}
+
+/* Custom arrow for the select dropdown (optional, but makes it look cleaner) */
+.goog-te-gadget-simple::after {
+    content: '\f0d7'; /* Font Awesome chevron-down icon */
+    font-family: "Font Awesome 6 Free"; /* Ensure Font Awesome is loaded and correct font-family is used */
+    font-weight: 900; /* For solid icons */
+    margin-left: 5px;
+    color: #333;
+    pointer-events: none; /* So clicks go through to the select element */
+    display: inline-block;
+}
+
+/* Hide the default Google Translate branding */
+.goog-logo-link, .goog-te-info-link {
+    display: none !important;
+}
+.goog-tooltip, .goog-tooltip:hover {
+    display: none !important;
+}
+.VIpgJd-ZVi9od-ORHb-OEVmCD { /* Google Translate popup */
+    display: none !important;
+}
+
+/* Adjustments for responsiveness if needed */
+@media (max-width: 768px) {
+    .language-selector-container {
+        top: 10px;
+        right: 10px;
+        padding: 6px 10px;
+        border-radius: 6px;
+    }
+}
