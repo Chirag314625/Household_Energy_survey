@@ -10,7 +10,7 @@
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"> 
 </head>
 <body>
-  <div class="language-selector-container">
+  <div class="language-selector-container" style="display: none;">
     <div id="google_translate_element"></div>
   </div>
 
@@ -37,26 +37,27 @@
     <div id="status" style="margin-top: 20px;"></div>
   </div>
 
-  <script>
-    window.addEventListener('pageshow', function(event) {
-      document.body.style.opacity = '1';
-      document.body.style.transition = 'opacity 0.5s ease-in';
-      document.body.classList.add('loaded');
-    });
-
-    document.addEventListener('DOMContentLoaded', function() {
-      document.body.classList.add('loaded');
-      // Add any page-specific JS here, like form validation etc.
-    });
-  </script>
-
   <script type="text/javascript">
+    // Google Translate initialization function - required for the script to execute
     function googleTranslateElementInit() {
       new google.translate.TranslateElement(
         { pageLanguage: 'en', includedLanguages: 'en,hi,gu,bn,ta,te,ml,kn,pa,mr', layout: google.translate.TranslateElement.InlineLayout.SIMPLE },
         'google_translate_element'
       );
     }
+
+    window.addEventListener('pageshow', function(event) {
+      document.body.style.opacity = '1';
+      document.body.style.transition = 'opacity 0.5s ease-in';
+      document.body.classList.add('loaded');
+      // No need for a custom loadGoogleTranslate function here,
+      // as the static script tag below will handle it.
+    });
+
+    document.addEventListener('DOMContentLoaded', function() {
+      document.body.classList.add('loaded');
+      // Add any page-specific JS here, like form validation etc.
+    });
   </script>
   <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
   
@@ -75,7 +76,7 @@
         text: "What is your city and pincode?",
         input: "multiple",
         inputs: [
-          { name: "City/ Village", placeholder: "City", type: "text" },
+          { name: "City", placeholder: "City / Village", type: "text" },
           { name: "Pincode", placeholder: "Pincode", type: "text", pattern: "^\\d{6}$", validationMessage: "Please enter a valid 6-digit numeric Pincode." }
         ]
       },

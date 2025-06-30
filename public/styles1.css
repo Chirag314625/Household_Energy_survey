@@ -10,32 +10,32 @@
   --success-color: #10b981;
   --warning-color: #f59e0b;
   --error-color: #ef4444;
-  
+
   --text-primary: #1f2937;
   --text-secondary: #6b7280;
   --text-muted: #9ca3af;
   --text-light: #ffffff;
-  
+
   --bg-primary: #ffffff;
   --bg-secondary: #f8fafc;
   --bg-tertiary: #f1f5f9;
   --bg-dark: #0f172a;
   --bg-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   --bg-gradient-light: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
-  
+
   --border-color: #e2e8f0;
   --border-light: #f1f5f9;
   --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
   --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
   --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
   --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
-  
+
   --radius-sm: 0.375rem;
   --radius-md: 0.5rem;
   --radius-lg: 0.75rem;
   --radius-xl: 1rem;
   --radius-2xl: 1.5rem;
-  
+
   --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   --transition-fast: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -53,6 +53,11 @@ body {
   background: var(--bg-gradient);
   min-height: 100vh;
   overflow-x: hidden;
+  opacity: 0;
+  transition: opacity 0.5s ease-in;
+}
+body.loaded {
+  opacity: 1;
 }
 
 /* Background Particles Animation */
@@ -191,11 +196,12 @@ h1 {
   font-size: 3rem;
   font-weight: 700;
   color: var(--text-primary);
-  margin-bottom: 1rem;
   background: var(--bg-gradient);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  margin-bottom: 0; /* Ensures it doesn't push the selector down */
+  margin-right: 20px; /* Space between H1 and language selector */
 }
 
 .subtitle {
@@ -278,7 +284,6 @@ h1 {
   padding: 2rem;
   border-radius: var(--radius-lg);
   margin-bottom: 2rem;
-  /*border-left: 4px solid var(--primary-color);*/
   box-shadow: var(--shadow-md);
 }
 
@@ -387,88 +392,36 @@ h1 {
   transform: translateY(0);
 }
 
-/* Responsive Design */
-@media (max-width: 768px) {
-  .container {
-    padding: 1rem;
-  }
-  
-  .hero {
-    padding: 2rem;
-  }
-  
-  h1 {
-    font-size: 2.5rem;
-  }
-  
-  .subtitle {
-    font-size: 1.1rem;
-  }
-  
-  .description {
-    font-size: 1rem;
-  }
-  
-  .features {
-    grid-template-columns: 1fr;
-    gap: 1.5rem;
-  }
-  
-  .info-grid {
-    grid-template-columns: 1fr;
-    gap: 1rem;
-  }
-  
-  .info-item {
-    padding: 1rem;
-  }
-  
-  .cta-button {
-    padding: 0.875rem 1.5rem;
-    font-size: 1rem;
-  }
+/* --- Language Selector Positioning and Styling --- */
+
+/* This parent container uses Flexbox to position its children (h1 and language selector) */
+.title-and-language {
+    display: flex; /* Make it a flex container */
+    align-items: center; /* Vertically center the items */
+    justify-content: space-between; /* This pushes the h1 to the left, and the language selector to the right */
+    flex-wrap: wrap; /* Allows items to wrap onto the next line on smaller screens */
+    margin-bottom: 1.5rem; /* Space below this entire title/selector block */
+    max-width: 100%; /* Ensure it doesn't overflow its parent */
+    text-align: left; /* Aligns content within this flex container, though flexbox overrides for children */
 }
 
-@media (max-width: 480px) {
-  .hero {
-    padding: 1.5rem;
-  }
-  
-  h1 {
-    font-size: 2rem;
-  }
-  
-  .hero-icon {
-    width: 60px;
-    height: 60px;
-    margin-bottom: 1.5rem;
-  }
-  
-  .hero-icon i {
-    font-size: 1.5rem;
-  }
-  
-  .progress-info {
-    padding: 1.5rem;
-  }
-}
-
-/* Language Selector Button Styling */
+/* Styling for the language selector's container */
 .language-selector-container {
-    position: absolute;
-    top: 20px; /* Adjust as needed */
-    right: 20px; /* Adjust as needed */
-    z-index: 999;
-    background-color: rgba(255, 255, 255, 0.2); /* Slightly transparent background */
+    /* 'margin-left: auto' will absorb available space to the left, pushing it to the far right within its flex parent */
+    margin-left: auto; 
+    
+    position: static; /* Important: Ensures it flows with content, not absolutely positioned relative to viewport */
+    top: auto;        /* Reset any potential absolute positioning from other rules */
+    right: auto;      /* Reset any potential absolute positioning from other rules */
+    
+    z-index: 1; /* Ensure it's on top if elements overlap */
+    background-color: rgba(255, 255, 255, 0.2); /* Light transparent background */
     backdrop-filter: blur(5px); /* Frosted glass effect */
     border-radius: 8px;
     padding: 8px 12px;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
     transition: all 0.3s ease;
-    display: flex; /* To center the dropdown */
-    align-items: center;
-    justify-content: center;
-    overflow: hidden; /* Hide overflow of the Google Translate elements */
+    overflow: hidden; /* Important for Google Translate's iframe */
 }
 
 .language-selector-container:hover {
@@ -476,25 +429,25 @@ h1 {
     box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
 }
 
-/* Specific styling for Google Translate elements inside the container */
+/* Specific styling for Google Translate elements */
 #google_translate_element {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Modern font */
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     font-size: 14px;
-    color: #333; /* Darker text for readability */
+    color: #333;
 }
 
 /* Target the specific Google Translate select box */
 .goog-te-gadget-simple {
-    background-color: transparent !important; /* Make background transparent */
-    border: none !important; /* Remove border */
-    padding: 0 !important; /* Remove default padding */
+    background-color: transparent !important;
+    border: none !important;
+    padding: 0 !important;
     font-size: inherit !important;
     font-family: inherit !important;
     color: inherit !important;
-    box-shadow: none !important; /* Remove any box shadow */
+    box-shadow: none !important;
     cursor: pointer;
-    vertical-align: middle; /* Align nicely with text */
-    line-height: normal !important; /* Ensure proper line height */
+    vertical-align: middle; /* Helps with alignment within the Google Translate element itself */
+    line-height: normal !important;
 }
 
 .goog-te-gadget-simple select {
@@ -508,7 +461,7 @@ h1 {
     -webkit-appearance: none; /* Remove default dropdown arrow for custom styling */
     -moz-appearance: none;
     appearance: none;
-    width: auto; /* Allow select to take natural width */
+    width: auto;
 }
 
 /* Custom arrow for the select dropdown (optional, but makes it look cleaner) */
@@ -523,22 +476,88 @@ h1 {
 }
 
 /* Hide the default Google Translate branding */
-.goog-logo-link, .goog-te-info-link {
-    display: none !important;
-}
-.goog-tooltip, .goog-tooltip:hover {
-    display: none !important;
-}
-.VIpgJd-ZVi9od-ORHb-OEVmCD { /* Google Translate popup */
-    display: none !important;
+.goog-logo-link, .goog-te-info-link { display: none !important; }
+.goog-tooltip, .goog-tooltip:hover { display: none !important; }
+.VIpgJd-ZVi9od-ORHb-OEVmCD { display: none !important; } /* Google Translate popup */
+
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .container {
+    padding: 1rem;
+  }
+
+  .hero {
+    padding: 2rem;
+  }
+
+  h1 {
+    font-size: 2.5rem;
+  }
+
+  .subtitle {
+    font-size: 1.1rem;
+  }
+
+  .description {
+    font-size: 1rem;
+  }
+
+  .features {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .info-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .info-item {
+    padding: 1rem;
+  }
+
+  .cta-button {
+    padding: 0.875rem 1.5rem;
+    font-size: 1rem;
+  }
+
+  /* Responsive adjustments for title and language selector: Stack them vertically */
+  .title-and-language {
+      flex-direction: column; /* Stack vertically on small screens */
+      gap: 10px; /* Space between stacked elements */
+      text-align: center; /* Center the stacked items */
+  }
+  .language-selector-container {
+      margin-left: 0; /* Remove auto margin when stacked */
+  }
+  /* Re-adjust h1 margin for stacking */
+  h1 {
+      margin-bottom: 0.5rem; /* Add some space below h1 when stacked */
+      margin-right: 0; /* Remove right margin when stacked */
+  }
 }
 
-/* Adjustments for responsiveness if needed */
-@media (max-width: 768px) {
-    .language-selector-container {
-        top: 10px;
-        right: 10px;
-        padding: 6px 10px;
-        border-radius: 6px;
-    }
+@media (max-width: 480px) {
+  .hero {
+    padding: 1.5rem;
+  }
+
+  h1 {
+    font-size: 2rem;
+  }
+
+  .hero-icon {
+    width: 60px;
+    height: 60px;
+    margin-bottom: 1.5rem;
+  }
+
+  .hero-icon i {
+    font-size: 1.5rem;
+  }
+
+  .progress-info {
+    padding: 1.5rem;
+  }
 }

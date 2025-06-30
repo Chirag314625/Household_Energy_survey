@@ -5,23 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Energy Consumption Survey</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link href="styles1.css" rel="stylesheet">
-    <style>
-        /* Optional: Add a smooth fade-in for initial load if desired */
-        body {
-            opacity: 0; /* Start invisible for initial load */
-            transition: opacity 0.5s ease-in; /* Fade in on initial load */
-        }
-        body.loaded {
-            opacity: 1; /* Make visible once JS runs */
-        }
-    </style>
-</head>
+    <link href="styles1.css" rel="stylesheet"> </head>
 <body>
-    <div class="language-selector-container">
-        <div id="google_translate_element"></div>
-    </div>
-
     <div class="bg-particles">
         <div class="particle"></div>
         <div class="particle"></div>
@@ -36,7 +21,12 @@
                 <i class="fas fa-bolt"></i>
             </div>
 
-            <h1>Energy Consumption Survey</h1>
+            <div class="title-and-language">
+                <h1>Energy Consumption Survey</h1>
+                <div class="language-selector-container">
+                    <div id="google_translate_element"></div>
+                </div>
+            </div>
             <p class="description">
                 We hope you enjoy completing this questionnaire and greatly appreciate your help in understanding how energy is consumed in households across India.
             </p>
@@ -70,15 +60,75 @@
         </div>
     </div>
 
-    <script>
+    <script type="text/javascript">
+        // Google Translate initialization function - must be globally accessible
+        function googleTranslateElementInit() {
+            new google.translate.TranslateElement(
+                { pageLanguage: 'en', includedLanguages: 'en,hi,gu,bn,ta,te,ml,kn,pa,mr', layout: google.translate.TranslateElement.InlineLayout.SIMPLE },
+                'google_translate_element'
+            );
+        }
+
+        // Function to re-insert and re-initialize Google Translate
+        function loadGoogleTranslate() {
+            const container = document.querySelector('.language-selector-container');
+            let translateDiv = document.getElementById('google_translate_element');
+
+            // Remove existing translate elements and scripts
+            if (translateDiv) {
+                translateDiv.remove();
+            }
+            // Also remove any existing Google Translate script to ensure a fresh load
+            const existingScript = document.querySelector('script[src*="//translate.google.com/translate_a/element.js"]');
+            if (existingScript) {
+                existingScript.remove();
+            }
+
+            // Re-create the div
+            translateDiv = document.createElement('div');
+            translateDiv.id = 'google_translate_element';
+            container.appendChild(translateDiv);
+
+            // Re-create and append the Google Translate script
+            const script = document.createElement('script');
+            script.type = 'text/javascript';
+            script.src = '//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';
+            document.body.appendChild(script);
+        }
+
         // Add a pageshow listener to handle back/forward cache
         window.addEventListener('pageshow', function(event) {
             // Ensure the body is visible whether it's a fresh load or from bfcache
             document.body.style.opacity = '1';
             document.body.style.transition = 'opacity 0.5s ease-in'; // Re-apply fade-in
             document.body.classList.add('loaded'); // Add class to trigger initial fade-in CSS
+
+            // Reload/re-initialize Google Translate whenever the page is shown
+            // This is crucial for bfcache
+            loadGoogleTranslate();
+
+            // --- Implement a setInterval to repeatedly clear the hash (for Google Translate's hash issue) ---
+            let hashClearInterval;
+            const checkDuration = 5000; // Total duration to keep checking (5 seconds)
+            const checkInterval = 100; // How often to check (every 100ms)
+            let elapsed = 0;
+
+            hashClearInterval = setInterval(() => {
+                // If a hash exists in the URL, remove it
+                if (window.location.hash) {
+                    history.replaceState('', document.title, window.location.pathname + window.location.search);
+                }
+
+                elapsed += checkInterval;
+                // Stop checking after the specified duration
+                if (elapsed >= checkDuration) {
+                    clearInterval(hashClearInterval);
+                }
+            }, checkInterval);
+            // --- END hash clear interval ---
         });
 
+        // Initial DOMContentLoaded for other scripts, but Google Translate handled by pageshow
         document.addEventListener('DOMContentLoaded', function() {
             // Initial fade-in trigger (if using the optional CSS above)
             document.body.classList.add('loaded');
@@ -107,15 +157,5 @@
             });
         });
     </script>
-
-    <script type="text/javascript">
-        function googleTranslateElementInit() {
-            new google.translate.TranslateElement(
-                { pageLanguage: 'en', includedLanguages: 'en,hi,gu,bn,ta,te,ml,kn,pa,mr', layout: google.translate.TranslateElement.InlineLayout.SIMPLE },
-                'google_translate_element'
-            );
-        }
-    </script>
-    <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 </body>
 </html>
