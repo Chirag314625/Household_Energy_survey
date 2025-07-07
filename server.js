@@ -3,13 +3,40 @@ const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const path = require("path");
+const rateLimit = require("express-rate-limit"); // Import rate-limit middleware
 require("dotenv").config(); // Load environment variables from .env file
 
 const app = express();
 
+// -----------------------------------------------------------
+// Rate Limiting Middleware
+// This helps prevent "Too Many Requests" by limiting the number
+// of requests an IP can make within a certain time window.
+// Adjust windowMs and max according to your needs.
+// -----------------------------------------------------------
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // Limit each IP to 100 requests per windowMs
+  message: "Too many requests from this IP, please try again after 15 minutes."
+});
+
+// Apply the rate limiting middleware to all requests.
+// Make sure this is applied BEFORE your specific routes.
+app.use(apiLimiter);
+
 // Middleware
 app.use(cors());
 app.use(express.json()); // For parsing application/json
+
+// -----------------------------------------------------------
+// Health Check Endpoint
+// A simple endpoint for Render (or other monitoring services)
+// to check if your application is alive and responding.
+// Configure Render's Health Check Path to /health.
+// -----------------------------------------------------------
+app.get("/health", (req, res) => {
+    res.status(200).send("OK");
+});
 
 // Serve home.html at the root URL
 app.get("/", (req, res) => {
