@@ -38,7 +38,7 @@ app.get("/health", (req, res) => {
     res.status(200).send("OK");
 });
 
-// Serve home.html at the root URL
+// Serve home.html at the root URL (localhost:3000 will show home.html)
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "home.html"));
 });
@@ -48,10 +48,10 @@ app.get("/index.html", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
-// Serve the new thankyou.html page
-app.get("/thankyou.html", (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "thankyou.html"));
-});
+// REMOVE THIS ROUTE: thankyou.html is now handled client-side within index.html
+// app.get("/thankyou.html", (req, res) => {
+//   res.sendFile(path.join(__dirname, "public", "thankyou.html"));
+// });
 
 // Serve static files from the public directory (CSS, JS, etc.)
 app.use(express.static(path.join(__dirname, "public")));
@@ -106,6 +106,7 @@ app.post("/api/submit-survey", async (req, res) => {
         if (!req.body || Object.keys(req.body).length === 0) {
             return res.status(400).json({ error: "Form data is empty." });
         }
+        
 
         const sanitizedData = sanitizeKeys(req.body);
         const newForm = new Form(sanitizedData);

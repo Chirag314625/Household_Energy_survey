@@ -649,3 +649,65 @@ button {
         border-radius: 6px;
     }
 }
+
+/* Add these styles to your styles.css file */
+
+.thankyou-container {
+    display: flex; /* Changed from default block to flex for centering */
+    flex-direction: column; /* Stack children vertically */
+    justify-content: center; /* Center content vertically */
+    align-items: center; /* Center content horizontally */
+    min-height: 80vh; /* Ensure it takes up enough height */
+    background-color: var(--bg-primary); /* Use your defined primary background color */
+    padding: 40px 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    max-width: 600px; /* Adjust as needed */
+    width: 90%;
+    margin: 50px auto; /* Center the container on the page */
+    text-align: center;
+}
+
+.thankyou-container h1 {
+    color: var(--success-color); /* Use your defined success color */
+    font-size: 2.8em; /* Slightly larger for impact */
+    margin-bottom: 25px;
+    display: flex;
+    align-items: center;
+    gap: 15px; /* Space between icon and text */
+}
+
+.thankyou-container h1 .fas {
+    font-size: 1.2em; /* Adjust icon size relative to text */
+}
+
+.thankyou-container p {
+    font-size: 1.2em;
+    line-height: 1.7;
+    margin-bottom: 40px;
+    color: var(--text-primary);
+}
+
+.home-button {
+    display: inline-flex; /* Use flex for icon and text alignment */
+    align-items: center;
+    gap: 8px; /* Space between icon and text */
+    background-color: var(--primary-color); /* Use your defined primary color */
+    color: var(--text-light);
+    padding: 15px 30px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-size: 1.1em;
+    font-weight: 600;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.home-button:hover {
+    background-color: var(--primary-dark);
+    transform: translateY(-2px);
+}
+
+.home-button .fas {
+    font-size: 1em; /* Ensure icon scales with button text */
+}
