@@ -6,6 +6,7 @@
   --primary-dark: #4f46e5;
   --primary-light: #818cf8;
   --secondary-color: #06b6d4;
+  --secondary-color-dark: #0497b0;
   --accent-color: #f59e0b;
   --success-color: #10b981;
   --warning-color: #f59e0b;
@@ -47,13 +48,23 @@
   box-sizing: border-box;
 }
 
+/* Apply background to html and ensure full height coverage */
+html {
+  min-height: 100vh; /* Ensures html element is at least the height of the viewport */
+  background: var(--bg-gradient);
+  background-attachment: fixed; /* Crucial for preventing repetition and fixing background on scroll */
+}
+
 body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
   line-height: 1.6;
   color: var(--text-primary);
-  background: var(--bg-gradient);
-  min-height: 100vh;
+  /* Removed background property here, it's now on html */
+  min-height: 100vh; /* Keep min-height on body to help content centering/stretching */
   padding: 2rem 1rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 /* Main Container */
@@ -67,6 +78,7 @@ body {
   box-shadow: var(--shadow-xl);
   overflow: hidden;
   animation: slideUp 0.8s ease-out;
+  flex-shrink: 0;
 }
 
 @keyframes slideUp {
@@ -113,7 +125,7 @@ body {
 /* Form Styling */
 form {
   padding: 2rem;
-  padding-bottom: 120px; /* Space for fixed button bar */
+  padding-bottom: calc(4rem + 1rem + 1rem + 10px);
 }
 
 /* Question Blocks */
@@ -434,10 +446,11 @@ label:has(input:checked) {
   display: flex;
   gap: 1rem;
   justify-content: flex-end;
+  align-items: center;
 }
 
 /* Button Styling */
-button {
+button, .home-nav-button {
   padding: 0.875rem 1.5rem;
   border: none;
   border-radius: var(--radius-md);
@@ -451,19 +464,22 @@ button {
   gap: 0.5rem;
   position: relative;
   overflow: hidden;
+  text-decoration: none;
+  justify-content: center;
+  min-width: 80px;
 }
 
 #resetBtn {
   background: var(--bg-secondary);
   color: var(--text-secondary);
- border: 1px solid var(--border-color);
+  border: 1px solid var(--border-color);
 }
 
 #resetBtn:hover {
- background: var(--bg-tertiary);
- color: var(--text-primary);
- transform: translateY(-1px);
- box-shadow: var(--shadow-md);
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
 }
 
 #submitBtn {
@@ -480,6 +496,20 @@ button {
 #submitBtn:active {
   transform: translateY(0);
 }
+
+/* New Home Button Specific Styles */
+.home-nav-button {
+    background-color: var(--secondary-color);
+    color: var(--text-light);
+    border: none;
+}
+
+.home-nav-button:hover {
+    background-color: var(--secondary-color-dark);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+}
+
 
 /* Status Messages */
 #status {
@@ -524,28 +554,27 @@ button {
 
 /* Custom Styles for City and Pincode Alignment */
 .input-group-item {
-  display: flex; /* Use flexbox for horizontal alignment */
-  align-items: center; /* Vertically center items */
-  gap: 10px; /* Space between label and input */
-  margin-bottom: 15px; /* Space between City and Pincode rows */
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 15px;
 }
 
 .input-group-item label {
-  flex-shrink: 0; /* Prevent label from shrinking */
-  width: 80px; /* Fixed width for labels to align inputs */
-  text-align: right; /* Align label text to the right */
-  font-weight: bold; /* Make labels stand out */
-  /* Override default label padding and background if they conflict */
+  flex-shrink: 0;
+  width: 80px;
+  text-align: right;
+  font-weight: bold;
   padding: 0;
   background: transparent;
+  color: var(--text-primary);
 }
 
 .input-group-item input[type="text"] {
-  flex-grow: 1; /* Allow input to take remaining space */
-  /* Ensure these properties are consistent with your general input[type="text"] styles if they exist elsewhere */
-  padding: 0.875rem 1rem; /* Use values from your general input styles */
-  border: 1px solid var(--border-color); /* Use your defined CSS variables */
-  border-radius: var(--radius-md); /* Use your defined CSS variables */
+  flex-grow: 1;
+  padding: 0.875rem 1rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
 }
 
 /* Override default label hover/checked styles for these specific labels if necessary */
@@ -555,27 +584,27 @@ button {
 
 .input-group-item label:has(input:checked) {
     background: transparent;
-    color: var(--text-secondary); /* Keep text color consistent with non-checked labels */
+    color: var(--text-primary);
     font-weight: bold;
 }
 
 
-/* Language Selector Button Styling - ALREADY PRESENT IN YOUR PROVIDED CSS */
+/* Language Selector Button Styling */
 .language-selector-container {
     position: absolute;
-    top: 20px; /* Adjust as needed */
-    right: 20px; /* Adjust as needed */
+    top: 20px;
+    right: 20px;
     z-index: 999;
-    background-color: rgba(255, 255, 255, 0.2); /* Slightly transparent background */
-    backdrop-filter: blur(5px); /* Frosted glass effect */
+    background-color: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(5px);
     border-radius: 8px;
     padding: 8px 12px;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
     transition: all 0.3s ease;
-    display: flex; /* To center the dropdown */
+    display: flex;
     align-items: center;
     justify-content: center;
-    overflow: hidden; /* Hide overflow of the Google Translate elements */
+    overflow: hidden;
 }
 
 .language-selector-container:hover {
@@ -585,23 +614,23 @@ button {
 
 /* Specific styling for Google Translate elements inside the container */
 #google_translate_element {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Modern font */
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     font-size: 14px;
-    color: #333; /* Darker text for readability */
+    color: #333;
 }
 
 /* Target the specific Google Translate select box */
 .goog-te-gadget-simple {
-    background-color: transparent !important; /* Make background transparent */
-    border: none !important; /* Remove border */
-    padding: 0 !important; /* Remove default padding */
+    background-color: transparent !important;
+    border: none !important;
+    padding: 0 !important;
     font-size: inherit !important;
     font-family: inherit !important;
     color: inherit !important;
-    box-shadow: none !important; /* Remove any box shadow */
+    box-shadow: none !important;
     cursor: pointer;
-    vertical-align: middle; /* Align nicely with text */
-    line-height: normal !important; /* Ensure proper line height */
+    vertical-align: middle;
+    line-height: normal !important;
 }
 
 .goog-te-gadget-simple select {
@@ -612,20 +641,20 @@ button {
     font-family: inherit !important;
     color: inherit !important;
     cursor: pointer;
-    -webkit-appearance: none; /* Remove default dropdown arrow for custom styling */
+    -webkit-appearance: none;
     -moz-appearance: none;
     appearance: none;
-    width: auto; /* Allow select to take natural width */
+    width: auto;
 }
 
 /* Custom arrow for the select dropdown (optional, but makes it look cleaner) */
 .goog-te-gadget-simple::after {
-    content: '\f0d7'; /* Font Awesome chevron-down icon */
-    font-family: "Font Awesome 6 Free"; /* Ensure Font Awesome is loaded and correct font-family is used */
-    font-weight: 900; /* For solid icons */
+    content: '\f0d7';
+    font-family: "Font Awesome 6 Free";
+    font-weight: 900;
     margin-left: 5px;
     color: #333;
-    pointer-events: none; /* So clicks go through to the select element */
+    pointer-events: none;
     display: inline-block;
 }
 
@@ -636,7 +665,7 @@ button {
 .goog-tooltip, .goog-tooltip:hover {
     display: none !important;
 }
-.VIpgJd-ZVi9od-ORHb-OEVmCD { /* Google Translate popup */
+.VIpgJd-ZVi9od-ORHb-OEVmCD {
     display: none !important;
 }
 
@@ -648,37 +677,67 @@ button {
         padding: 6px 10px;
         border-radius: 6px;
     }
+
+    .form-container {
+        padding: 1rem;
+        border-radius: var(--radius-xl);
+    }
+
+    .form-container h2 {
+        padding: 1.5rem;
+        font-size: 1.5rem;
+    }
+
+    form {
+        padding: 1.5rem;
+        padding-bottom: calc(4rem + 1rem + 1rem + 10px);
+    }
+
+    .button-container {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    button, .home-nav-button {
+        width: 100%;
+        min-width: auto;
+    }
 }
 
-/* Add these styles to your styles.css file */
-
+/* Thank You Container Styles */
 .thankyou-container {
-    display: flex; /* Changed from default block to flex for centering */
-    flex-direction: column; /* Stack children vertically */
-    justify-content: center; /* Center content vertically */
-    align-items: center; /* Center content horizontally */
-    min-height: 80vh; /* Ensure it takes up enough height */
-    background-color: var(--bg-primary); /* Use your defined primary background color */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 80vh;
+    background-color: var(--bg-primary);
     padding: 40px 30px;
-    border-radius: 10px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-    max-width: 600px; /* Adjust as needed */
+    border-radius: var(--radius-2xl);
+    box-shadow: var(--shadow-lg);
+    max-width: 600px;
     width: 90%;
-    margin: 50px auto; /* Center the container on the page */
+    margin: 50px auto;
     text-align: center;
+    animation: fadeIn 0.8s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
 .thankyou-container h1 {
-    color: var(--success-color); /* Use your defined success color */
-    font-size: 2.8em; /* Slightly larger for impact */
+    color: var(--success-color);
+    font-size: 2.8em;
     margin-bottom: 25px;
     display: flex;
     align-items: center;
-    gap: 15px; /* Space between icon and text */
+    gap: 15px;
 }
 
 .thankyou-container h1 .fas {
-    font-size: 1.2em; /* Adjust icon size relative to text */
+    font-size: 1.2em;
 }
 
 .thankyou-container p {
@@ -689,25 +748,26 @@ button {
 }
 
 .home-button {
-    display: inline-flex; /* Use flex for icon and text alignment */
+    display: inline-flex;
     align-items: center;
-    gap: 8px; /* Space between icon and text */
-    background-color: var(--primary-color); /* Use your defined primary color */
+    gap: 8px;
+    background-color: var(--primary-color);
     color: var(--text-light);
     padding: 15px 30px;
-    border-radius: 8px;
+    border-radius: var(--radius-md);
     text-decoration: none;
     font-size: 1.1em;
     font-weight: 600;
-    transition: background-color 0.3s ease, transform 0.2s ease;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    transition: var(--transition);
+    box-shadow: var(--shadow-md);
 }
 
 .home-button:hover {
     background-color: var(--primary-dark);
     transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
 }
 
 .home-button .fas {
-    font-size: 1em; /* Ensure icon scales with button text */
+    font-size: 1em;
 }
