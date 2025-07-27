@@ -33,7 +33,6 @@ This project is a web-based application designed to collect data on household en
 - Node.js
 - Express.js (Web Framework)
 - Mongoose (MongoDB ODM)
-- CORS (Middleware for cross-origin requests)
 - dotenv (for environment variable management)
 - express-rate-limit (for API rate limiting)
 
