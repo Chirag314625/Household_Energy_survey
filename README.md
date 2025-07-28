@@ -119,6 +119,86 @@ Once the server is running:
 
 ---
 
+# Household Energy Survey Data Analysis
+
+This script (`Survey1.py`) processes household energy survey data from a CSV file, estimates electricity and total energy consumption, and visualizes energy breakdowns and trends by home characteristics.
+
+---
+
+## Features
+
+- **Reads CSV Data**: Loads household survey responses.
+- **Estimates Appliance Electricity Use**: Calculates annual kWh for typical appliances.
+- **Scales to Reported Bills**: Adjusts estimates using reported electricity bills for accuracy.
+- **Fuel-Based BTU Estimates**: Converts fuel use (gas, LPG, oil, wood) to BTU.
+- **Combined Energy Breakdown**: Pie charts for electricity by appliance and total energy by source.
+- **Trends by Home Age**: Bar/line chart compares energy use and home size by year built.
+
+
+---
+
+## Prerequisites
+
+Install required libraries:
+
+```sh
+pip install pandas numpy matplotlib
+```
+
+---
+
+## How to Use
+
+1. **Prepare Data**: Ensure your CSV file uses the required column names (see below).
+2. **Configure Script**: Save as `Survey1.py` and place your CSV file (e.g., `realistic_dummy_forms.csv`) in the same folder. Edit the filename in the script if needed.
+3. **Run**:  
+   ```sh
+   python Survey1.py
+   ```
+   The script prints summary info and displays plots.
+
+---
+
+## Input CSV File Format
+
+The script expects columns matching survey questions, such as:
+
+- `Q0_name`, `Q1_City`, `Q2_num_adults`, `Q7_sq_ft_home`, `Q9_num_refrigerators`, `Q62_last_electricity_consumption`, etc.
+
+**Tip:** See the script or the full documentation above for a detailed list of expected columns.
+
+---
+
+## How It Works (Brief)
+
+- Loads and cleans the data.
+- Estimates appliance electricity use and scales to match reported bill data.
+- Converts fuel use to BTU and sums with electricity.
+- Aggregates results for all households.
+- Plots:
+  - Pie charts: Appliance-wise and fuel-wise energy shares.
+  - Bar/line chart: Energy and home size by year built.
+- Handles missing or invalid data gracefully.
+
+---
+
+## Visualization
+
+- **Pie Charts:**  
+  - Appliance electricity breakdown  
+  - Total energy by fuel type
+- **Bar/Line Chart:**  
+  - Avg. square footage (bars) and energy use (line) by year built/moved-in
+
+---
+
+## Notes
+
+- The script is intended for survey data analysis and visualization.
+- Ensure your CSV columns match the expected names for correct operation.
+
+---
+
 ## 🤝 Contributing
 
 Contributions are welcome! If you have suggestions for improvements or find any issues, please feel free to:
