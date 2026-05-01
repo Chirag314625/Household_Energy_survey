@@ -2,6 +2,336 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt  # Import matplotlib for plotting
 import matplotlib.cm as cm  # Import colormap for diverse colors
+from datetime import datetime, timedelta
+import warnings
+warnings.filterwarnings('ignore')
+
+
+# ==================== APPLIANCE SIMULATION MODELS ====================
+
+class AirConditionerModel:
+    """Simulates AC operation with thermal physics and control logic"""
+    def __init__(self, power_watt=2000, cop=3.5):
+        self.t_set = 22.0
+        self.hysteresis = 1.0
+        self.power_watt = power_watt
+        self.cooling_eff = cop
+        self.temp_room = 28.0
+        self.temp_outside = 35.0
+        self.insulation_k = 0.05
+        self.air_mass_const = 0.1
+        self.is_on = False
+        self.energy_used_wh = 0
+        self.activity_log = []
+
+    def simulate_step(self, dt_minutes=1, outside_temp=35.0):
+        self.temp_outside = outside_temp
+        if self.temp_room > (self.t_set + self.hysteresis):
+            self.is_on = True
+        elif self.temp_room < (self.t_set - self.hysteresis):
+            self.is_on = False
+        
+        heat_gain = self.insulation_k * (self.temp_outside - self.temp_room)
+        cooling_power = (self.power_watt * self.cooling_eff) / 1000 if self.is_on else 0
+        heat_removal = cooling_power * self.air_mass_const
+        
+        self.temp_room += (heat_gain - heat_removal)
+        current_power = self.power_watt if self.is_on else 0
+        self.energy_used_wh += (current_power * (dt_minutes / 60))
+        self.activity_log.append(current_power)
+        return self.temp_room, current_power
+
+
+class CeilingFanModel:
+    """Simulates ceiling fan operation with variable speeds"""
+    def __init__(self, max_power=75.0):
+        self.max_power_watt = max_power
+        self.current_speed = 0
+        self.speed_map = {0: 0, 1: 15, 2: 30, 3: 45, 4: 60, 5: 75}
+        self.energy_used_wh = 0
+        self.activity_log = []
+
+    def set_speed(self, speed):
+        if 0 <= speed <= 5:
+            self.current_speed = speed
+
+    def simulate_step(self, dt_minutes=1):
+        current_power = self.speed_map[self.current_speed]
+        self.energy_used_wh += (current_power * (dt_minutes / 60))
+        self.activity_log.append(current_power)
+        return current_power
+
+
+class LightingSystemModel:
+    """Simulates lighting system with multiple bulb types"""
+    def __init__(self, room_name="Living Room", num_bulbs=4):
+        self.room_name = room_name
+        self.bulb_types = {"LED": 9, "CFL": 20, "Incandescent": 60}
+        self.active_type = "LED"
+        self.num_bulbs = num_bulbs
+        self.is_on = False
+        self.energy_used_wh = 0
+        self.activity_log = []
+
+    def set_bulb_type(self, type_name):
+        if type_name in self.bulb_types:
+            self.active_type = type_name
+
+    def simulate_step(self, hour, minute):
+        if (18 <= hour <= 23) or (7 <= hour <= 8):
+            self.is_on = True
+        else:
+            self.is_on = False
+        
+        current_power = (self.num_bulbs * self.bulb_types[self.active_type]) if self.is_on else 0
+        self.energy_used_wh += (current_power * (1 / 60))
+        self.activity_log.append(current_power)
+        return current_power
+
+
+class WashingMachineModel:
+    """Simulates washing machine cycle stages"""
+    def __init__(self):
+        self.program = [
+            {"state": "WASH", "duration": 30, "power": 2000},
+            {"state": "RINSE", "duration": 15, "power": 300},
+            {"state": "SPIN", "duration": 10, "power": 800}
+        ]
+        self.current_minute = 0
+        self.total_energy_wh = 0
+        self.activity_log = []
+
+    def simulate_cycle(self):
+        for stage in self.program:
+            duration = stage["duration"]
+            power_level = stage["power"]
+            for m in range(duration):
+                minute_energy = power_level * (1/60)
+                self.total_energy_wh += minute_energy
+                self.activity_log.append(power_level)
+                self.current_minute += 1
+        return self.total_energy_wh
+
+
+class TelevisionModel:
+    """Simulates TV operation with size and technology factors"""
+    def __init__(self, size_inches=55, tech="LED"):
+        self.size = size_inches
+        self.tech = tech
+        power_factor = 0.15 if tech == "OLED" else 0.12
+        self.active_power = self.size * 2.0 * power_factor
+        self.standby_power = 1.5
+        self.is_on = False
+        self.energy_used_wh = 0
+        self.activity_log = []
+
+    def simulate_step(self, hour, minute):
+        if (7 == hour and minute >= 30) or (8 == hour and minute <= 30) or (19 <= hour <= 23):
+            self.is_on = True
+        else:
+            self.is_on = False
+        
+        current_power = self.active_power if self.is_on else self.standby_power
+        self.energy_used_wh += (current_power * (1 / 60))
+        self.activity_log.append(current_power)
+        return current_power
+
+
+class RefrigeratorModel:
+    """Simulates refrigerator compressor operation with thermostat control"""
+    def __init__(self, power_watt=150):
+        self.t_set = 4.0
+        self.hysteresis = 1.0
+        self.power_watt = power_watt
+        self.temp_inside = 10.0
+        self.temp_ambient = 25.0
+        self.insulation_k = 0.02
+        self.energy_used = 0
+        self.activity_log = []
+
+    def simulate_step(self, dt_minutes=1):
+        is_on = self.temp_inside > (self.t_set + self.hysteresis)
+        heat_leak = self.insulation_k * (self.temp_ambient - self.temp_inside)
+        cooling = 0.5 if is_on else 0
+        self.temp_inside += (heat_leak - cooling)
+        
+        current_power = self.power_watt if is_on else 0
+        self.energy_used += (current_power * (dt_minutes / 60))
+        self.activity_log.append(abs(current_power))
+        return current_power
+
+
+class ComputingLoadModel:
+    """Simulates computer usage with different states (Sleep, Idle, High Work)"""
+    def __init__(self, device_type="Laptop"): 
+        self.type = device_type
+        if device_type == "Desktop":
+            self.states = {"Sleep": 5, "Idle": 80, "High_Work": 250}
+        else:
+            self.states = {"Sleep": 1, "Idle": 15, "High_Work": 65}
+        self.current_state = "Idle"
+        self.energy_used_wh = 0
+        self.activity_log = []
+
+    def simulate_step(self, hour, minute):
+        if (9 <= hour <= 17) or (20 <= hour <= 23):
+            self.current_state = "High_Work"
+        elif (0 <= hour <= 8):
+            self.current_state = "Sleep"
+        else:
+            self.current_state = "Idle"
+        
+        current_power = self.states[self.current_state]
+        self.energy_used_wh += (current_power * (1 / 60))
+        self.activity_log.append(current_power)
+        return current_power
+
+
+class WaterHeaterModel:
+    """Simulates electric water heater with thermostat control"""
+    def __init__(self, capacity_liters=25, power_watt=3000):
+        self.capacity = capacity_liters
+        self.power_watt = power_watt
+        self.t_set = 60.0
+        self.t_deadband = 2.0
+        self.temp_water = 25.0
+        self.temp_ambient = 25.0
+        self.insulation_k = 0.001
+        self.specific_heat_water = 4186
+        self.is_heating = False
+        self.energy_used_wh = 0
+        self.activity_log = []
+
+    def use_hot_water(self, liters):
+        fraction_replaced = min(liters / self.capacity, 1.0)
+        self.temp_water = (self.temp_water * (1 - fraction_replaced)) + (25.0 * fraction_replaced)
+
+    def simulate_step(self, hour, minute, dt_seconds=60):
+        if hour == 8 and minute == 0:
+            self.use_hot_water(15)
+        
+        if self.temp_water < (self.t_set - self.t_deadband):
+            self.is_heating = True
+        elif self.temp_water >= self.t_set:
+            self.is_heating = False
+        
+        q_in = (self.power_watt * dt_seconds) if self.is_heating else 0
+        q_loss = self.insulation_k * (self.temp_water - self.temp_ambient) * dt_seconds
+        mass = self.capacity
+        self.temp_water += (q_in - q_loss) / (mass * self.specific_heat_water)
+        
+        current_power = self.power_watt if self.is_heating else 0
+        self.energy_used_wh += (current_power * (dt_seconds / 3600))
+        self.activity_log.append(current_power)
+        return current_power
+
+
+class KitchenAppliancesModel:
+    """Simulates kitchen appliances (coffee maker, blender, toaster, etc.)"""
+    def __init__(self):
+        self.catalog = {
+            "Coffee_Maker": 900,
+            "Blender": 400,
+            "Toaster_Oven": 1500,
+            "Air_Fryer": 1800,
+            "Mixer": 300
+        }
+        self.total_energy_wh = 0
+        self.activity_log = []
+
+    def run_task(self, appliance_name, duration_minutes):
+        if appliance_name in self.catalog:
+            power = self.catalog[appliance_name]
+            task_energy = power * (duration_minutes / 60)
+            self.total_energy_wh += task_energy
+            return [power] * int(duration_minutes)
+        return []
+
+    def simulate_day(self):
+        day_log = [0] * 1440
+        day_log[450:460] = self.run_task("Coffee_Maker", 10)
+        day_log[460:465] = self.run_task("Toaster_Oven", 5)
+        day_log[780:782] = self.run_task("Blender", 2)
+        day_log[1200:1220] = self.run_task("Air_Fryer", 20)
+        self.activity_log = day_log
+        return day_log
+
+
+# ==================== APPLIANCE ANALYSIS FRAMEWORK ====================
+
+class ApplianceSimulator:
+    """Manages and simulates all household appliances for detailed energy analysis"""
+    def __init__(self):
+        self.appliances = {}
+        self.initialize_appliances()
+
+    def initialize_appliances(self):
+        self.appliances = {
+            'AC': AirConditionerModel(),
+            'Ceiling_Fan': CeilingFanModel(),
+            'Living_Room_Lights': LightingSystemModel("Living Room", 4),
+            'Bedroom_Lights': LightingSystemModel("Bedroom", 3),
+            'Refrigerator': RefrigeratorModel(),
+            'Washing_Machine': WashingMachineModel(),
+            'Television': TelevisionModel(55, "LED"),
+            'Laptop': ComputingLoadModel("Laptop"),
+            'Desktop': ComputingLoadModel("Desktop"),
+            'Water_Heater': WaterHeaterModel(),
+            'Kitchen_Appliances': KitchenAppliancesModel()
+        }
+
+    def simulate_24_hours(self):
+        """Simulate all appliances for 24 hours and collect energy data"""
+        daily_energy = {}
+        hourly_data = []
+        
+        for hour in range(24):
+            for minute in range(0, 60, 15):  # Simulate 15 minute intervals
+                hour_data = {}
+                total_power = 0
+                
+                for name, appliance in self.appliances.items():
+                    if isinstance(appliance, AirConditionerModel):
+                        outside_temp = 28 if 8 <= hour <= 18 else 24
+                        _, power = appliance.simulate_step(15, outside_temp)
+                    elif isinstance(appliance, LightingSystemModel):
+                        power = appliance.simulate_step(hour, minute)
+                    elif isinstance(appliance, TelevisionModel):
+                        power = appliance.simulate_step(hour, minute)
+                    elif isinstance(appliance, ComputingLoadModel):
+                        power = appliance.simulate_step(hour, minute)
+                    elif isinstance(appliance, RefrigeratorModel):
+                        power = appliance.simulate_step(15)
+                    elif isinstance(appliance, WaterHeaterModel):
+                        power = appliance.simulate_step(hour, minute, 900)
+                    else:
+                        power = 0
+                    
+                    hour_data[name] = power
+                    total_power += power
+                
+                hourly_data.append({'hour': hour, 'minute': minute, 'total_power_w': total_power, **hour_data})
+        
+        # Calculate daily totals
+        for name, appliance in self.appliances.items():
+            if hasattr(appliance, 'energy_used_wh'):
+                daily_energy[name] = appliance.energy_used_wh
+            elif hasattr(appliance, 'energy_used'):
+                daily_energy[name] = appliance.energy_used
+        
+        return daily_energy, pd.DataFrame(hourly_data)
+
+    def get_peak_load_analysis(self, hourly_df):
+        """Analyze peak load patterns throughout the day"""
+        peak_data = hourly_df.groupby('hour')['total_power_w'].agg(['max', 'mean', 'min'])
+        return peak_data
+
+    def get_appliance_efficiency_ratings(self, daily_energy):
+        """Calculate efficiency ratings for each appliance"""
+        max_energy = max(daily_energy.values()) if daily_energy.values() else 1
+        efficiency = {name: ((max_energy - energy) / max_energy * 100) for name, energy in daily_energy.items()}
+        return efficiency
+
 
 # --- Appliance and Usage Data (Typical Values Only) ---
 # Appliance power consumption in Watts (now single typical value)
@@ -274,6 +604,20 @@ class EnergyConsumptionCosts:
     def _calculate_kwh_typical(self, typical_value, num_units=1):
         """Helper to calculate typical kWh for an appliance."""
         return round(typical_value * num_units, 2)
+
+    def simulate_household_appliances(self):
+        """Simulate all household appliances for 24-hour period"""
+        simulator = ApplianceSimulator()
+        daily_energy, hourly_df = simulator.simulate_24_hours()
+        peak_load = simulator.get_peak_load_analysis(hourly_df)
+        efficiency = simulator.get_appliance_efficiency_ratings(daily_energy)
+        
+        return {
+            'daily_energy': daily_energy,
+            'hourly_data': hourly_df,
+            'peak_load': peak_load,
+            'efficiency_ratings': efficiency
+        }
 
     def estimate_annual_electricity_consumption(self):
         """
@@ -625,12 +969,116 @@ class EnergyConsumptionCosts:
         return btu_equivalents
 
 
-class Metadata:
-    def __init__(self, row):
-        self._id = row.get('__v')  # Corrected: Use _id for internal tracking if needed, otherwise remove.
+class DetailedHouseholdAnalysis:
+    """Provides comprehensive household energy analysis with recommendations"""
+    
+    def __init__(self, energy_costs_instance, electricity_breakdown_kwh, fuel_btu_equivalents):
+        self.energy_costs = energy_costs_instance
+        self.electricity_kwh = electricity_breakdown_kwh
+        self.fuel_btu = fuel_btu_equivalents
+        self.KWH_TO_BTU = 3412.14
+        self.electricity_rate = 0.12  # Average $/kWh (can be parametrized)
+        self.natural_gas_rate = 10.5  # $/1000 BTU (can be parametrized)
+
+    def calculate_annual_cost_breakdown(self):
+        """Calculate detailed annual costs by appliance category"""
+        cost_breakdown = {}
+        
+        # Electricity costs
+        for appliance, kwh in self.electricity_kwh.items():
+            cost_breakdown[f"{appliance} (Electricity)"] = round(kwh * self.electricity_rate, 2)
+        
+        # Natural gas costs
+        if self.fuel_btu.get('Natural Gas', 0) > 0:
+            ng_cost = (self.fuel_btu['Natural Gas'] / 1000) * self.natural_gas_rate
+            cost_breakdown['Natural Gas'] = round(ng_cost, 2)
+        
+        # Other fuel costs
+        for fuel, btu in self.fuel_btu.items():
+            if fuel not in ['Natural Gas', 'Electricity']:
+                # Estimate cost (varies by location)
+                fuel_cost = (btu / 1000) * 8  # Approximate rate
+                cost_breakdown[fuel] = round(fuel_cost, 2)
+        
+        return cost_breakdown
+
+    def get_major_energy_consumers(self, top_n=5):
+        """Identify top N energy consuming appliances"""
+        sorted_appliances = sorted(self.electricity_kwh.items(), key=lambda x: x[1], reverse=True)
+        return sorted_appliances[:top_n]
+
+    def generate_efficiency_recommendations(self):
+        """Generate personalized energy efficiency recommendations"""
+        recommendations = []
+        
+        major_consumers = self.get_major_energy_consumers()
+        
+        for appliance, kwh in major_consumers:
+            if 'AC' in appliance and kwh > 3000:
+                recommendations.append({
+                    'appliance': appliance,
+                    'current_kwh': kwh,
+                    'recommendation': 'Consider upgrading to a high-efficiency AC unit (SEER 13+)',
+                    'estimated_savings_kwh': kwh * 0.25
+                })
+            elif 'Refrigerator' in appliance and kwh > 1000:
+                recommendations.append({
+                    'appliance': appliance,
+                    'current_kwh': kwh,
+                    'recommendation': 'Refrigerator is older; consider ENERGY STAR model',
+                    'estimated_savings_kwh': kwh * 0.30
+                })
+            elif 'Water Heater' in appliance and kwh > 2000:
+                recommendations.append({
+                    'appliance': appliance,
+                    'current_kwh': kwh,
+                    'recommendation': 'Use solar water heater or high-efficiency electric heater',
+                    'estimated_savings_kwh': kwh * 0.40
+                })
+            elif 'Lighting' in appliance and kwh > 500:
+                recommendations.append({
+                    'appliance': appliance,
+                    'current_kwh': kwh,
+                    'recommendation': 'Replace all bulbs with LED (9W instead of 60W)',
+                    'estimated_savings_kwh': kwh * 0.75
+                })
+        
+        return recommendations
+
+    def calculate_carbon_footprint(self):
+        """Calculate household carbon footprint from energy consumption"""
+        # CO2 factors (kg CO2 per unit)
+        co2_factor_kwh = 0.45  # kg CO2 per kWh (varies by region)
+        co2_factor_btu = 0.000053  # kg CO2 per BTU
+        
+        total_electricity_kwh = sum(self.electricity_kwh.values())
+        electricity_co2 = total_electricity_kwh * co2_factor_kwh
+        
+        total_fuel_btu = sum(self.fuel_btu.values())
+        fuel_co2 = total_fuel_btu * co2_factor_btu
+        
+        total_co2 = electricity_co2 + fuel_co2
+        
+        return {
+            'electricity_co2_kg': round(electricity_co2, 2),
+            'fuel_co2_kg': round(fuel_co2, 2),
+            'total_co2_kg': round(total_co2, 2),
+            'total_co2_metric_tons': round(total_co2 / 1000, 3)
+        }
+
+    def get_load_profile_analysis(self):
+        """Analyze household load profile patterns"""
+        simulator = ApplianceSimulator()
+        daily_energy, hourly_df = simulator.simulate_24_hours()
+        
+        hourly_profile = hourly_df.groupby('hour')[['total_power_w']].mean()
+        hourly_profile['peak_w'] = hourly_df.groupby('hour')['total_power_w'].max()
+        hourly_profile['min_w'] = hourly_df.groupby('hour')['total_power_w'].min()
+        
+        return hourly_profile
 
 
-# --- Class for Plotting Energy Use ---
+# --- Class for Plotting Energy Use (Parent Class for EnhancedPlotting) ---
 class PlotElectricityUse:
     def plot_combined_energy_breakdowns(self, electricity_breakdown_data, total_energy_breakdown_data):
         """
@@ -644,16 +1092,13 @@ class PlotElectricityUse:
             total_energy_breakdown_data (dict): A dictionary where keys are category names
                                                 and values are their estimated annual total energy consumption (typical values).
         """
-        fig, axes = plt.subplots(1, 2, figsize=(20, 10))  # Increased figure size for better legend visibility
+        fig, axes = plt.subplots(1, 2, figsize=(20, 10))
 
-        # Define a color map for consistent colors across plots if categories overlap
         colors = plt.colormaps.get_cmap('tab20')
 
-        # Helper function for autopct format (only percentage)
         def autopct_format(pct):
-            return ('%.1f%%' % pct) if pct > 0 else ''  # Show percentage only if > 0
+            return ('%.1f%%' % pct) if pct > 0 else ''
 
-        # --- Plot 1: Electricity Consumption Breakdown (kWh) ---
         filtered_electricity_data = {k: v for k, v in electricity_breakdown_data.items() if pd.notna(v) and v > 0}
 
         if not filtered_electricity_data:
@@ -664,30 +1109,22 @@ class PlotElectricityUse:
         else:
             labels_elec = list(filtered_electricity_data.keys())
             sizes_elec = list(filtered_electricity_data.values())
-
-            # Assign colors based on index in filtered data
             pie_colors_elec = [colors(i % colors.N) for i in range(len(labels_elec))]
 
-            # Corrected unpacking: Use a dummy variable for the 'texts' return value
             wedges_elec, _, autotexts_elec = axes[0].pie(
                 sizes_elec,
                 autopct=autopct_format,
                 startangle=90,
-                pctdistance=0.85,  # Distance of percentage labels from center
-                colors=pie_colors_elec,  # Apply custom colors
-                wedgeprops=dict(width=0.3),  # Make it a donut chart
-                textprops={'fontsize': 9, 'color': 'white'}  # Font size and color for percentages
+                pctdistance=0.85,
+                colors=pie_colors_elec,
+                wedgeprops=dict(width=0.3),
+                textprops={'fontsize': 9, 'color': 'white'}
             )
             axes[0].axis('equal')
             axes[0].set_title('Annual Electricity Consumption Breakdown (kWh)', fontsize=14)
+            axes[0].legend(wedges_elec, labels_elec, title="Electricity Categories",
+                           loc="center left", bbox_to_anchor=(1, 0, 0.5, 1))
 
-            # Create legend outside the circle
-            axes[0].legend(wedges_elec, labels_elec,
-                           title="Electricity Categories",
-                           loc="center left",
-                           bbox_to_anchor=(1, 0, 0.5, 1))  # Position legend outside
-
-        # --- Plot 2: Total Energy Consumption Breakdown (BTU) ---
         filtered_total_energy_data = {k: v for k, v in total_energy_breakdown_data.items() if pd.notna(v) and v > 0}
 
         if not filtered_total_energy_data:
@@ -698,36 +1135,28 @@ class PlotElectricityUse:
         else:
             labels_total = list(filtered_total_energy_data.keys())
             sizes_total = list(filtered_total_energy_data.values())
-
-            # Assign colors based on index in filtered data
             pie_colors_total = [colors(i % colors.N) for i in range(len(labels_total))]
 
-            # Corrected unpacking: Use a dummy variable for the 'texts' return value
             wedges_total, _, autotexts_total = axes[1].pie(
                 sizes_total,
                 autopct=autopct_format,
                 startangle=90,
                 pctdistance=0.85,
-                colors=pie_colors_total,  # Apply custom colors
-                wedgeprops=dict(width=0.3),  # Make it a donut chart
+                colors=pie_colors_total,
+                wedgeprops=dict(width=0.3),
                 textprops={'fontsize': 9, 'color': 'white'}
             )
             axes[1].axis('equal')
             axes[1].set_title('Annual Total Energy Consumption Breakdown (BTU)', fontsize=14)
+            axes[1].legend(wedges_total, labels_total, title="Total Energy Categories",
+                           loc="center left", bbox_to_anchor=(1, 0, 0.5, 1))
 
-            # Create legend outside the circle
-            axes[1].legend(wedges_total, labels_total,
-                           title="Total Energy Categories",
-                           loc="center left",
-                           bbox_to_anchor=(1, 0, 0.5, 1))  # Position legend outside
-
-        plt.tight_layout(rect=[0, 0, 0.9, 1])  # Adjust layout to prevent legends from overlapping with titles
-        plt.show()  # Display the plot
+        plt.tight_layout(rect=[0, 0, 0.9, 1])
+        plt.show()
 
     def plot_energy_by_year_built(self, aggregated_data):
         """
         Plots Average BTU and Average Sq Ft by Year Range.
-        Average Sq Ft will be a bar chart, and Average BTU will be a line chart on a secondary axis.
 
         Args:
             aggregated_data (pd.DataFrame): DataFrame with 'Year Range', 'Average BTU', and 'Average Sq Ft' columns.
@@ -736,9 +1165,6 @@ class PlotElectricityUse:
             print("No data available to plot energy consumption by year built/moved-in.")
             return
 
-        # Sort the data by 'Year Range' for better visualization of trends
-        # Define a custom sorting order for 'Year Range'
-        # This order needs to match the way year_range is categorized in your processing logic
         year_order = [
             'Before 1950', '1950-1959', '1960-1969', '1970-1979', '1980-1989',
             '1990-1999', '2000-2009', '2010-2019', '2020 or later'
@@ -746,32 +1172,61 @@ class PlotElectricityUse:
         aggregated_data['Year Range'] = pd.Categorical(aggregated_data['Year Range'], categories=year_order, ordered=True)
         aggregated_data = aggregated_data.sort_values('Year Range')
 
-
         fig, ax1 = plt.subplots(figsize=(12, 7))
 
-        # Bar chart for Average Sq Ft
         color_sqft = 'tab:blue'
         ax1.set_xlabel('Year Built/Moved-in Range', fontsize=12)
         ax1.set_ylabel('Average Square Feet', color=color_sqft, fontsize=12)
         ax1.bar(aggregated_data['Year Range'], aggregated_data['Average Sq Ft'], color=color_sqft, alpha=0.6, width=0.7)
         ax1.tick_params(axis='y', labelcolor=color_sqft)
-        ax1.set_ylim(bottom=0) # Ensure y-axis starts at 0
+        ax1.set_ylim(bottom=0)
 
-        # Create a second y-axis for Average BTU
         ax2 = ax1.twinx()
         color_btu = 'tab:red'
         ax2.set_ylabel('Average Total BTU (Millions)', color=color_btu, fontsize=12)
         ax2.plot(aggregated_data['Year Range'], aggregated_data['Average BTU'], color=color_btu, marker='o', linestyle='-', linewidth=2)
         ax2.tick_params(axis='y', labelcolor=color_btu)
-        ax2.set_ylim(bottom=0) # Ensure y-axis starts at 0
+        ax2.set_ylim(bottom=0)
 
-        # Title and Grid
         plt.title('Average Energy Consumption and Square Footage by Year Built/Moved-in', fontsize=16)
-        fig.tight_layout() # Adjust layout to prevent labels from overlapping
+        fig.tight_layout()
         plt.grid(True, linestyle='--', alpha=0.7)
-        plt.xticks(rotation=45, ha='right') # Rotate x-axis labels for better readability
-        plt.show() # Display the plot
+        plt.xticks(rotation=45, ha='right')
+        plt.show()
 
+
+class EnhancedPlotting(PlotElectricityUse):
+    """Enhanced plotting with additional visualization capabilities"""
+    
+    def plot_hourly_load_profile(self, hourly_profile):
+        """Plot hourly load profile throughout the day"""
+        fig, ax = plt.subplots(figsize=(14, 7))
+        
+        hours = hourly_profile.index
+        
+        ax.fill_between(hours, hourly_profile['min_w'], hourly_profile['peak_w'], 
+                        alpha=0.2, label='Peak-to-Min Range')
+        ax.plot(hours, hourly_profile['total_power_w'], marker='o', linewidth=2, 
+               label='Average Load', color='blue')
+        ax.plot(hours, hourly_profile['peak_w'], linestyle='--', 
+               label='Peak Load', color='red')
+        ax.plot(hours, hourly_profile['min_w'], linestyle='--', 
+               label='Minimum Load', color='green')
+        
+        ax.set_xlabel('Hour of Day', fontsize=12)
+        ax.set_ylabel('Power (Watts)', fontsize=12)
+        ax.set_title('Household Hourly Load Profile (24-Hour Simulation)', fontsize=14)
+        ax.set_xticks(range(0, 24, 2))
+        ax.legend()
+        ax.grid(alpha=0.3)
+        
+        plt.tight_layout()
+        plt.show()
+
+
+class Metadata:
+    def __init__(self, row):
+        self._id = row.get('__v')
 
 # --- Main function to process and print data ---
 
@@ -819,6 +1274,7 @@ def print_personal_appliance_data(file_path):
 
         # Create an instance of the plotting class
         plotter = PlotElectricityUse()
+        enhanced_plotter = EnhancedPlotting()
 
         # Dictionary to accumulate total electricity consumption (kWh) for each appliance category across all users
         # Stores typical values
@@ -911,18 +1367,86 @@ def print_personal_appliance_data(file_path):
                     print(
                         f"  Difference (Calibrated Typical - Reported): {round(total_typical_kwh_calibrated - reported_annual_kwh, 2)} kWh/year")
 
-                # --- BTU Equivalents for Other Fuels ---
+                # --- BTU Equivalents for Other Fuels (MOVED BEFORE DETAILED ANALYSIS) ---
                 print(f"\n--- Estimated Annual Energy Consumption (BTU Equivalents by Fuel Type) ---")
                 fuel_btu_equivalents = energy_costs_instance.calculate_btu_equivalents()
 
-                total_fuel_btu = 0 # Initialize for combined total BTU
+                total_fuel_btu = 0
                 for fuel_type, btu_typical in fuel_btu_equivalents.items():
                     if fuel_type != 'Electricity (Total)':
                         print(f"    {fuel_type}: {btu_typical} BTU/year")
-                        # Accumulate for the combined total BTU plot (other fuel types)
                         all_users_combined_total_btu_breakdown[fuel_type] = \
                             all_users_combined_total_btu_breakdown.get(fuel_type, 0) + btu_typical
                         total_fuel_btu += btu_typical
+
+                # --- DETAILED HOUSEHOLD ANALYSIS ---
+                print(f"\n--- Detailed Household Energy Analysis ---")
+                detailed_analysis = DetailedHouseholdAnalysis(
+                    energy_costs_instance,
+                    electricity_appliance_breakdown_calibrated_kwh,
+                    fuel_btu_equivalents
+                )
+
+                # Cost breakdown
+                print(f"\n--- Annual Cost Breakdown by Appliance ---")
+                cost_breakdown = detailed_analysis.calculate_annual_cost_breakdown()
+                for appliance, cost in sorted(cost_breakdown.items(), key=lambda x: x[1], reverse=True):
+                    print(f"    {appliance}: ${cost:.2f}")
+                total_annual_cost = sum(cost_breakdown.values())
+                print(f"  Total Estimated Annual Cost: ${total_annual_cost:.2f}")
+
+                # Major energy consumers
+                print(f"\n--- Top 5 Energy Consumers ---")
+                major_consumers = detailed_analysis.get_major_energy_consumers(5)
+                for i, (appliance, kwh) in enumerate(major_consumers, 1):
+                    percentage = (kwh / total_typical_kwh_calibrated * 100) if total_typical_kwh_calibrated > 0 else 0
+                    print(f"    {i}. {appliance}: {kwh} kWh/year ({percentage:.1f}%)")
+
+                # Efficiency recommendations
+                print(f"\n--- Energy Efficiency Recommendations ---")
+                recommendations = detailed_analysis.generate_efficiency_recommendations()
+                if recommendations:
+                    for i, rec in enumerate(recommendations, 1):
+                        print(f"    {i}. {rec['appliance']}")
+                        print(f"       Current: {rec['current_kwh']} kWh/year")
+                        print(f"       Recommendation: {rec['recommendation']}")
+                        print(f"       Potential Savings: {rec['estimated_savings_kwh']:.0f} kWh/year (${rec['estimated_savings_kwh'] * 0.12:.2f})")
+                else:
+                    print("    No major inefficiencies detected.")
+
+                # Carbon footprint
+                print(f"\n--- Carbon Footprint Analysis ---")
+                carbon_data = detailed_analysis.calculate_carbon_footprint()
+                print(f"    Electricity CO2: {carbon_data['electricity_co2_kg']} kg")
+                print(f"    Fuel CO2: {carbon_data['fuel_co2_kg']} kg")
+                print(f"    Total CO2: {carbon_data['total_co2_kg']} kg ({carbon_data['total_co2_metric_tons']} metric tons/year)")
+                equivalent_trees = carbon_data['total_co2_kg'] / 20  # 1 tree absorbs ~20 kg CO2/year
+                print(f"    Equivalent to: {equivalent_trees:.1f} trees needed to offset")
+
+                # --- Appliance-Level Detailed Simulation ---
+                print(f"\n--- Detailed Appliance Simulation (24-Hour Profile) ---")
+                try:
+                    simulator_results = energy_costs_instance.simulate_household_appliances()
+                    daily_energy = simulator_results['daily_energy']
+                    peak_load = simulator_results['peak_load']
+                    efficiency_ratings = simulator_results['efficiency_ratings']
+                    
+                    print(f"    Daily Energy Consumption by Appliance:")
+                    for appliance, energy_wh in sorted(daily_energy.items(), key=lambda x: x[1], reverse=True):
+                        energy_kwh = energy_wh / 1000
+                        print(f"      {appliance}: {energy_kwh:.2f} kWh/day ({energy_kwh*365:.1f} kWh/year)")
+                    
+                    print(f"\n    Peak Load Analysis:")
+                    print(f"      Average Peak Hour: {peak_load['max'].mean():.0f}W")
+                    print(f"      Average Hourly Load: {peak_load['mean'].mean():.0f}W")
+                    print(f"      Minimum Hourly Load: {peak_load['min'].mean():.0f}W")
+                    print(f"      Peak-to-minimum ratio: {peak_load['max'].mean() / peak_load['min'].mean():.2f}x")
+                    
+                    print(f"\n    Appliance Efficiency Ratings (Higher is better):")
+                    for appliance, rating in sorted(efficiency_ratings.items(), key=lambda x: x[1], reverse=True)[:5]:
+                        print(f"      {appliance}: {rating:.1f}%")
+                except Exception as sim_error:
+                    print(f"    Note: Appliance simulation unavailable ({str(sim_error)[:50]}...)")
 
                 # --- Data for Year Built/Moved-in Plot ---
                 # Determine the relevant year based on ownership
@@ -996,6 +1520,33 @@ def print_personal_appliance_data(file_path):
             all_users_combined_total_btu_breakdown
         )
 
+        # --- Generate Enhanced Analysis Plots ---
+        print(f"\n\n{'=' * 50}")
+        print("Generating Advanced Energy Analysis Visualizations")
+        print(f"{'=' * 50}")
+        
+        # Get sample household for detailed analysis (first valid record)
+        for index, row_data in df.iterrows():
+            try:
+                energy_costs_instance = EnergyConsumptionCosts(row_data)
+                total_kwh, breakdown = energy_costs_instance.estimate_annual_electricity_consumption()
+                fuel_btu = energy_costs_instance.calculate_btu_equivalents()
+                
+                detailed_analysis = DetailedHouseholdAnalysis(energy_costs_instance, breakdown, fuel_btu)
+                
+                # Get hourly simulation data
+                simulator_results = energy_costs_instance.simulate_household_appliances()
+                hourly_df = simulator_results['hourly_data']
+                
+                # Plot hourly load profile
+                print("Generating hourly load profile chart...")
+                load_profile = detailed_analysis.get_load_profile_analysis()
+                enhanced_plotter.plot_hourly_load_profile(load_profile)
+                
+                break  # Only for first valid record
+            except:
+                continue
+
         # --- Process and Plot Data for 'Energy by Year Built/Moved-in' ---
         print(f"\n\n{'=' * 50}")
         print("Generating Energy Consumption by Year Built/Moved-in Plot")
@@ -1023,6 +1574,28 @@ def print_personal_appliance_data(file_path):
             plotter.plot_energy_by_year_built(aggregated_year_data)
         else:
             print("No valid year built/moved-in data found for plotting.")
+
+        # --- FINAL SUMMARY REPORT ---
+        print(f"\n\n{'=' * 70}")
+        print("COMPREHENSIVE SURVEY ANALYSIS - FINAL SUMMARY")
+        print(f"{'=' * 70}")
+        print(f"\nTotal Households Analyzed: {len(df)}")
+        print(f"\nAggregate Energy Statistics:")
+        print(f"  Total Electricity Consumption: {sum(all_users_combined_electricity_kwh_breakdown.values()):.0f} kWh/year")
+        print(f"  Total Energy (All Fuels): {sum(all_users_combined_total_btu_breakdown.values())/1_000_000:,.0f} Million BTU/year")
+        
+        if all_users_combined_electricity_kwh_breakdown:
+            avg_kwh_per_household = sum(all_users_combined_electricity_kwh_breakdown.values()) / len(df)
+            print(f"  Average per Household: {avg_kwh_per_household:.0f} kWh/year")
+        
+        print(f"\nTop 5 Energy Consuming Categories (Aggregate):")
+        sorted_categories = sorted(all_users_combined_electricity_kwh_breakdown.items(), key=lambda x: x[1], reverse=True)
+        for i, (category, kwh) in enumerate(sorted_categories[:5], 1):
+            percentage = (kwh / sum(all_users_combined_electricity_kwh_breakdown.values()) * 100) if all_users_combined_electricity_kwh_breakdown else 0
+            print(f"  {i}. {category}: {kwh:.0f} kWh/year ({percentage:.1f}%)")
+        
+        print(f"\nAnalysis Complete! Generated visualizations and detailed recommendations.")
+        print(f"{'=' * 70}\n")
 
 
     except FileNotFoundError:
