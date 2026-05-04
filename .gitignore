@@ -1,2 +1,6 @@
 .env
 node_modules/
+.matplotlib/
+__pycache__/
+*.pyc
+*.log

@@ -1,3 +1,8 @@
+import os
+os.environ.setdefault(
+    "MPLCONFIGDIR",
+    os.path.join(os.path.dirname(os.path.dirname(__file__)), ".matplotlib")
+)
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt  # Import matplotlib for plotting
@@ -1611,4 +1616,5 @@ def print_personal_appliance_data(file_path):
 # --- How to use the function ---
 # Ensure your prepared CSV file (e.g., 'realistic_dummy_forms_prepared.csv')
 # is in the same directory as this script, or provide the full path to the file.
-print_personal_appliance_data('realistic_dummy_forms.csv')  # Or 'realistic_dummy_forms_prepared.csv'
+if __name__ == '__main__':
+    print_personal_appliance_data('realistic_dummy_forms.csv')  # Or 'realistic_dummy_forms_prepared.csv'

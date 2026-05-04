@@ -1,35 +1,74 @@
 // Frontend script for connecting to backend
 
-const enabled = { fridge:true, ac:true, washer:true, fan:true, computer:true, kitchen:true, lighting:true, tv:true, heater:true };
+const applianceIds = ['fridge','ac','washer','fan','computer','kitchen','lighting','tv','heater'];
+const selected = { fridge:false, ac:false, washer:false, fan:false, computer:false, kitchen:false, lighting:false, tv:false, heater:false };
+const enabled = { fridge:false, ac:false, washer:false, fan:false, computer:false, kitchen:false, lighting:false, tv:false, heater:false };
+let pieChartInstance = null;
+let barChartInstance = null;
+let lineChartInstance = null;
 
 function switchTab(id) {
-  document.querySelectorAll('.tab').forEach((t,i) => {
-    const ids = ['fridge','ac','washer','fan','computer','kitchen','lighting','tv','heater'];
-    t.classList.toggle('active', ids[i] === id);
+  if (!selected[id]) return;
+  document.querySelectorAll('.tab').forEach(t => {
+    t.classList.toggle('active', t.dataset.appliance === id);
   });
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
   document.getElementById('panel-' + id).classList.add('active');
 }
 
+function renderSelectedEquipment(preferredId = null) {
+  const activePanel = document.querySelector('.panel.active');
+  const activeId = activePanel ? activePanel.id.replace('panel-', '') : null;
+  const visibleIds = applianceIds.filter(id => selected[id]);
+
+  document.querySelectorAll('.tab').forEach(tab => {
+    tab.style.display = selected[tab.dataset.appliance] ? 'block' : 'none';
+    tab.classList.remove('active');
+  });
+  document.querySelectorAll('.panel').forEach(panel => panel.classList.remove('active'));
+
+  document.getElementById('empty-parameters').style.display = visibleIds.length ? 'none' : 'block';
+
+  if (!visibleIds.length) return;
+
+  const nextId = preferredId && selected[preferredId]
+    ? preferredId
+    : selected[activeId]
+      ? activeId
+      : visibleIds[0];
+  switchTab(nextId);
+}
+
+function selectEquipment(id, checked) {
+  selected[id] = checked;
+  enabled[id] = checked;
+
+  const toggle = document.getElementById('tog-' + id);
+  if (toggle) toggle.classList.toggle('on', checked);
+
+  renderSelectedEquipment(checked ? id : null);
+}
+
 function toggleAppliance(id, el) {
+  if (!selected[id]) return;
   enabled[id] = !enabled[id];
   el.classList.toggle('on', enabled[id]);
 }
 
 function gv(id) { return parseFloat(document.getElementById(id).value) || 0; }
 
-function calculate() {
+async function calculate() {
   const tariff = gv('tariff');
   const data = {};
 
-  if (enabled.fridge) {
+  if (selected.fridge && enabled.fridge) {
     data.fridge = {
       watts: gv('fridge-watts'),
       duty: parseFloat(document.getElementById('fridge-star').value),
       qty: gv('fridge-qty')
     };
   }
-  if (enabled.ac) {
+  if (selected.ac && enabled.ac) {
     data.ac = {
       watts: gv('ac-ton'),
       eer: gv('ac-eer'),
@@ -38,7 +77,7 @@ function calculate() {
       qty: gv('ac-qty')
     };
   }
-  if (enabled.washer) {
+  if (selected.washer && enabled.washer) {
     data.washer = {
       watts: gv('washer-watts'),
       duration: gv('washer-duration'),
@@ -46,7 +85,7 @@ function calculate() {
       temp_factor: gv('washer-temp')
     };
   }
-  if (enabled.fan) {
+  if (selected.fan && enabled.fan) {
     data.fan = {
       watts: gv('fan-watts'),
       qty: gv('fan-qty'),
@@ -54,7 +93,7 @@ function calculate() {
       speed: gv('fan-speed')
     };
   }
-  if (enabled.computer) {
+  if (selected.computer && enabled.computer) {
     data.computer = {
       watts: gv('comp-watts'),
       monitor: gv('comp-monitor'),
@@ -62,7 +101,7 @@ function calculate() {
       router: gv('comp-router')
     };
   }
-  if (enabled.kitchen) {
+  if (selected.kitchen && enabled.kitchen) {
     data.kitchen = {
       micro_watts: gv('kit-micro'),
       micro_mins: gv('kit-micro-h'),
@@ -70,14 +109,14 @@ function calculate() {
       induction_hours: gv('kit-induction-h')
     };
   }
-  if (enabled.lighting) {
+  if (selected.lighting && enabled.lighting) {
     data.lighting = {
       watts: gv('light-type'),
       qty: gv('light-qty'),
       hours: gv('light-hours')
     };
   }
-  if (enabled.tv) {
+  if (selected.tv && enabled.tv) {
     data.tv = {
       watts: gv('tv-size'),
       qty: 1,  // assuming 1 TV
@@ -85,7 +124,7 @@ function calculate() {
       tech: 1.0  // assuming standard
     };
   }
-  if (enabled.heater) {
+  if (selected.heater && enabled.heater) {
     data.heater = {
       liters: gv('heat-liters'),
       uses: gv('heat-uses'),
@@ -95,21 +134,31 @@ function calculate() {
     };
   }
 
+  if (!Object.keys(data).length) {
+    alert('Select and enable at least one equipment item for analysis.');
+    return;
+  }
+
   data.tariff = tariff;
 
-  fetch('http://127.0.0.1:5000/api/calculate', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data)
-  })
-  .then(response => response.json())
-  .then(result => {
+  try {
+    const response = await fetch('/api/calculate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      throw new Error(result.error || 'Calculation request failed');
+    }
+
     displayResults(result);
-  })
-  .catch(error => {
+  } catch (error) {
     console.error('Error:', error);
-    alert('Failed to calculate. Ensure backend is running.');
-  });
+    alert(`Failed to calculate: ${error.message}`);
+  }
 }
 
 function displayResults(result) {
@@ -150,8 +199,8 @@ function displayResults(result) {
 
   // Pie chart
   const pieCtx = document.getElementById('pieChart').getContext('2d');
-  if (window.pieChart) window.pieChart.destroy();
-  window.pieChart = new Chart(pieCtx, {
+  if (pieChartInstance) pieChartInstance.destroy();
+  pieChartInstance = new Chart(pieCtx, {
     type: 'doughnut',
     data: {
       labels: result.appliances.map(a => a.name),
@@ -171,8 +220,8 @@ function displayResults(result) {
 
   // Bar chart
   const barCtx = document.getElementById('barChart').getContext('2d');
-  if (window.barChart) window.barChart.destroy();
-  window.barChart = new Chart(barCtx, {
+  if (barChartInstance) barChartInstance.destroy();
+  barChartInstance = new Chart(barCtx, {
     type: 'bar',
     data: {
       labels: result.appliances.map(a => a.name),
@@ -193,7 +242,7 @@ function displayResults(result) {
 
   // Line chart for projection
   const lineCtx = document.getElementById('lineChart').getContext('2d');
-  if (window.lineChart) window.lineChart.destroy();
+  if (lineChartInstance) lineChartInstance.destroy();
   const months = Array.from({length:12}, (_,i) => `Month ${i+1}`);
   const cumulative = [];
   let cum = 0;
@@ -201,7 +250,7 @@ function displayResults(result) {
     cum += result.total_monthly;
     cumulative.push(cum);
   }
-  window.lineChart = new Chart(lineCtx, {
+  lineChartInstance = new Chart(lineCtx, {
     type: 'line',
     data: {
       labels: months,
@@ -234,3 +283,7 @@ function displayResults(result) {
     recoGrid.appendChild(card);
   });
 }
+
+document.addEventListener('DOMContentLoaded', () => {
+  renderSelectedEquipment();
+});

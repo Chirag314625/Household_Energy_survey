@@ -81,6 +81,38 @@ header {
   letter-spacing: 0.05em;
   color: var(--text-muted);
 }
+.parameter-header { padding-top: 1rem; }
+
+.equipment-list {
+  display: grid;
+  gap: 8px;
+  padding: 0 2rem 1.25rem;
+  border-bottom: 1px solid var(--border);
+}
+.equipment-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 40px;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg);
+  color: var(--text-main);
+  font-size: 0.86rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+.equipment-option:hover {
+  background: var(--surface-alt);
+  border-color: var(--border-hover);
+}
+.equipment-option input {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--primary);
+}
 
 /* Tabs (Pill style) */
 .tabs {
@@ -103,9 +135,14 @@ header {
 }
 .tab:hover { background: var(--primary-soft); color: var(--text-main); }
 .tab.active { background: var(--primary); color: #fff; box-shadow: var(--shadow-sm); border-color: rgba(37, 99, 235, 0.3); }
-}
 
 /* Inputs */
+.empty-parameters {
+  padding: 2rem;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
 .field { margin-bottom: 1.25rem; }
 .field label {
   display: block;

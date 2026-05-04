@@ -5,7 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Thank You!</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link href="styles.css" rel="stylesheet"> <style>
+    <link href="../css/styles.css" rel="stylesheet">
+    <link rel="stylesheet" href="../css/navigation.css">
+    <style>
         body {
             display: flex;
             justify-content: center;
@@ -48,9 +50,24 @@
         .home-button:hover {
             background-color: #0056b3;
         }
-    </style>
+</style>
 </head>
 <body>
+
+<nav class="navbar">
+  <div class="navbar-container">
+    <a href="/" class="navbar-logo">
+      <span>⚡</span>
+    <script src="navigation.js"></script>
+      Energy Suite
+    </a>
+    <ul class="navbar-links">
+      <li><a href="/">Home</a></li>
+      <li><a href="/index.html">Survey</a></li>
+      <li><a href="/analyzer.html">Analyzer</a></li>
+    </ul>
+  </div>
+</nav>
     <div class="thankyou-container">
         <h1>Thank You!</h1>
         <p>Your survey has been successfully submitted. We appreciate your valuable insights.</p>

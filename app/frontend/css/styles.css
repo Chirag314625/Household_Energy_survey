@@ -21,8 +21,8 @@
   --bg-secondary: #f8fafc;
   --bg-tertiary: #f1f5f9;
   --bg-dark: #0f172a;
-  --bg-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  --bg-gradient-light: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+  --bg-gradient: linear-gradient(135deg, #2563eb 0%, #0f766e 100%);
+  --bg-gradient-light: linear-gradient(135deg, #eef6ff 0%, #ecfdf5 100%);
 
   --border-color: #e2e8f0;
   --border-light: #f1f5f9;
@@ -48,37 +48,35 @@
   box-sizing: border-box;
 }
 
-/* Apply background to html and ensure full height coverage */
 html {
-  min-height: 100vh; /* Ensures html element is at least the height of the viewport */
-  background: var(--bg-gradient);
-  background-attachment: fixed; /* Crucial for preventing repetition and fixing background on scroll */
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at top left, rgba(37, 99, 235, 0.24), transparent 30rem),
+    radial-gradient(circle at bottom right, rgba(15, 118, 110, 0.22), transparent 34rem),
+    linear-gradient(135deg, #f8fafc 0%, #eef6ff 48%, #ecfdf5 100%);
+  background-attachment: fixed;
 }
 
 body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
   line-height: 1.6;
   color: var(--text-primary);
-  /* Removed background property here, it's now on html */
-  min-height: 100vh; /* Keep min-height on body to help content centering/stretching */
-  padding: 2rem 1rem;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  min-height: 100vh;
+  padding: 0 0 7.5rem;
+  overflow-x: hidden;
 }
 
 /* Main Container */
 .form-container {
-  max-width: 800px;
-  margin: 0 auto;
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: var(--radius-2xl);
+  width: min(920px, calc(100% - 2rem));
+  margin: 2.25rem auto 0;
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(18px);
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  border-radius: var(--radius-xl);
   box-shadow: var(--shadow-xl);
   overflow: hidden;
   animation: slideUp 0.8s ease-out;
-  flex-shrink: 0;
 }
 
 @keyframes slideUp {
@@ -96,14 +94,15 @@ body {
 .form-container h2 {
   background: var(--bg-gradient);
   color: var(--text-light);
-  padding: 2rem;
+  padding: 2.25rem 2rem;
   margin: 0;
-  font-size: 1.75rem;
-  font-weight: 600;
+  font-size: clamp(1.55rem, 3vw, 2.15rem);
+  font-weight: 700;
   text-align: center;
   border-radius: 0;
   position: relative;
   overflow: hidden;
+  letter-spacing: 0;
 }
 
 .form-container h2::before {
@@ -125,23 +124,25 @@ body {
 /* Form Styling */
 form {
   padding: 2rem;
-  padding-bottom: calc(4rem + 1rem + 1rem + 10px);
+  padding-bottom: 2.5rem;
 }
 
 /* Question Blocks */
 .question-block {
-  margin-bottom: 2.5rem;
-  padding: 1.5rem;
-  background: var(--bg-secondary);
+  margin-bottom: 1rem;
+  padding: 1.35rem;
+  background: #ffffff;
   border-radius: var(--radius-lg);
-  border: 1px solid var(--border-color);
+  border: 1px solid rgba(148, 163, 184, 0.32);
   transition: var(--transition);
   position: relative;
+  box-shadow: var(--shadow-sm);
 }
 
 .question-block:hover {
-  border-color: var(--primary-light);
+  border-color: rgba(37, 99, 235, 0.42);
   box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
 }
 
 .question-block::before {
@@ -167,6 +168,7 @@ form {
   color: var(--text-primary);
   margin-bottom: 1rem;
   line-height: 1.5;
+  max-width: 70ch;
 }
 
 /* Input Styling */
@@ -175,7 +177,7 @@ input[type="number"],
 textarea,
 select {
   width: 100%;
-  padding: 0.875rem 1rem;
+  padding: 0.9rem 1rem;
   border: 1px solid var(--border-color);
   border-radius: var(--radius-md);
   font-size: 1rem;
@@ -183,6 +185,7 @@ select {
   background: var(--bg-primary);
   transition: var(--transition);
   margin-bottom: 0.5rem;
+  box-shadow: var(--shadow-sm);
 }
 
 input[type="text"]:focus,
@@ -248,7 +251,7 @@ label {
   color: var(--text-secondary);
   cursor: pointer;
   transition: var(--transition);
-  padding: 0.5rem;
+  padding: 0.65rem 0.75rem;
   border-radius: var(--radius-sm);
 }
 
@@ -270,7 +273,7 @@ label:has(input:checked) {
 
 .number-input-row {
   display: grid;
-  grid-template-columns: 1fr auto;
+  grid-template-columns: minmax(0, 1fr) 120px;
   gap: 1rem;
   align-items: center;
   padding: 0.75rem;
@@ -291,7 +294,7 @@ label:has(input:checked) {
 }
 
 .number-input-row input {
-  width: 100px;
+  width: 100%;
   margin-bottom: 0;
 }
 
@@ -432,16 +435,16 @@ label:has(input:checked) {
   bottom: 0;
   left: 0;
   right: 0;
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(20px);
-  border-top: 1px solid var(--border-color);
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(18px);
+  border-top: 1px solid rgba(148, 163, 184, 0.35);
   padding: 1rem;
   box-shadow: 0 -4px 6px -1px rgb(0 0 0 / 0.1);
-  z-index: 1000;
+  z-index: 900;
 }
 
 .button-container {
-  max-width: 800px;
+  max-width: 920px;
   margin: 0 auto;
   display: flex;
   gap: 1rem;
@@ -466,7 +469,7 @@ button, .home-nav-button {
   overflow: hidden;
   text-decoration: none;
   justify-content: center;
-  min-width: 80px;
+  min-width: 96px;
 }
 
 #resetBtn {
@@ -499,13 +502,13 @@ button, .home-nav-button {
 
 /* New Home Button Specific Styles */
 .home-nav-button {
-    background-color: var(--secondary-color);
+    background-color: #0f766e;
     color: var(--text-light);
     border: none;
 }
 
 .home-nav-button:hover {
-    background-color: var(--secondary-color-dark);
+    background-color: #115e59;
     transform: translateY(-2px);
     box-shadow: var(--shadow-lg);
 }
@@ -679,7 +682,9 @@ button, .home-nav-button {
     }
 
     .form-container {
-        padding: 1rem;
+        width: calc(100% - 1rem);
+        margin-top: 1rem;
+        padding: 0;
         border-radius: var(--radius-xl);
     }
 
@@ -689,18 +694,46 @@ button, .home-nav-button {
     }
 
     form {
-        padding: 1.5rem;
-        padding-bottom: calc(4rem + 1rem + 1rem + 10px);
+        padding: 1rem;
+        padding-bottom: 1.5rem;
+    }
+
+    .question-block {
+        padding: 1rem;
+    }
+
+    .grid-header,
+    .grid-row,
+    .number-input-row {
+        grid-template-columns: 1fr;
+    }
+
+    .yes-no-options,
+    .yes-no-buttons {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .input-group-item {
+        align-items: stretch;
+        flex-direction: column;
+        gap: 0.35rem;
+    }
+
+    .input-group-item label {
+        width: auto;
+        text-align: left;
     }
 
     .button-container {
-        flex-direction: column;
+        flex-direction: row;
         align-items: stretch;
+        gap: 0.65rem;
     }
 
     button, .home-nav-button {
         width: 100%;
         min-width: auto;
+        padding: 0.8rem 0.75rem;
     }
 }
 
