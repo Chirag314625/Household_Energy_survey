@@ -37,21 +37,34 @@ class FlaskApiTests(unittest.TestCase):
             "/api/calculate",
             json={
                 "tariff": 7,
-                "fridge": {"watts": 100, "duty": 0.5, "qty": 2},
-                "lighting": {"watts": 10, "qty": 5, "hours": 4},
+                "fridge": {
+                    "watts": 100,
+                    "duty": 0.5,
+                    "qty": 2,
+                    "age_factor": 1.1,
+                    "ambient_factor": 1,
+                    "door_factor": 1,
+                },
+                "lighting": {
+                    "watts": 10,
+                    "qty": 5,
+                    "hours": 4,
+                    "daylight_factor": 0.8,
+                    "occupancy_factor": 1,
+                },
             },
         )
 
         self.assertEqual(response.status_code, 200)
         data = response.get_json()
 
-        self.assertEqual(data["total_daily"], 2.6)
-        self.assertEqual(data["total_monthly"], 78)
-        self.assertEqual(data["monthly_cost"], 546)
+        self.assertEqual(data["total_daily"], 2.8)
+        self.assertEqual(data["total_monthly"], 84)
+        self.assertEqual(data["monthly_cost"], 588)
         self.assertEqual(data["tariff"], 7)
         self.assertEqual(
             {item["name"]: item["daily"] for item in data["appliances"]},
-            {"Refrigerator": 2.4, "Lighting": 0.2},
+            {"Refrigerator": 2.64, "Lighting": 0.16},
         )
 
     def test_submit_survey_saves_to_collection(self):

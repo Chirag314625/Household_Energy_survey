@@ -20,7 +20,7 @@
   --bg-secondary: #f8fafc;
   --bg-tertiary: #f1f5f9;
   --bg-dark: #0f172a;
-  --bg-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --bg-gradient: linear-gradient(135deg, #4f46e5 0%, #0ea5e9 100%);
   --bg-gradient-light: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
 
   --border-color: #e2e8f0;
@@ -50,34 +50,20 @@ body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
   line-height: 1.6;
   color: var(--text-primary);
-  background: var(--bg-gradient);
+  background-color: var(--bg-primary); /* Solid white background */
   min-height: 100vh;
   overflow-x: hidden;
   opacity: 0;
   transition: opacity 0.5s ease-in;
 }
+
 body.loaded {
   opacity: 1;
 }
 
 /* Background Particles Animation */
 .bg-particles {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  z-index: 0;
-}
-
-.particle {
-  position: absolute;
-  width: 4px;
-  height: 4px;
-  background: rgba(255, 255, 255, 0.6);
-  border-radius: 50%;
-  animation: float 6s ease-in-out infinite;
+  display: none; /* Hide particles */
 }
 
 .particle:nth-child(1) {
@@ -115,21 +101,10 @@ body.loaded {
   animation-duration: 9s;
 }
 
-@keyframes float {
-  0%, 100% {
-    transform: translateY(0px) rotate(0deg);
-    opacity: 0.6;
-  }
-  50% {
-    transform: translateY(-20px) rotate(180deg);
-    opacity: 1;
-  }
-}
-
 /* Container and Layout */
 .container {
-  position: relative;
-  z-index: 1;
+  position: relative; /* Needed for z-index to work */
+  z-index: 2; /* Ensure content is above the white overlay */
   max-width: 1200px;
   margin: 0 auto;
   padding: 2rem;
@@ -141,13 +116,13 @@ body.loaded {
 
 .hero {
   background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(20px);
+  backdrop-filter: blur(25px);
   border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: var(--radius-2xl);
-  padding: 3rem;
+  padding: 3.5rem;
   text-align: center;
-  box-shadow: var(--shadow-xl);
-  max-width: 800px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 40px rgba(255, 255, 255, 0.1);
+  max-width: 900px;
   width: 100%;
   animation: slideUp 0.8s ease-out;
 }
@@ -196,7 +171,7 @@ h1 {
   font-size: 3rem;
   font-weight: 700;
   color: var(--text-primary);
-  background: var(--bg-gradient);
+  background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -231,12 +206,13 @@ h1 {
 
 .feature {
   background: var(--bg-secondary);
-  padding: 2rem;
+  padding: 2.5rem 1.5rem;
   border-radius: var(--radius-lg);
   border: 1px solid var(--border-color);
   transition: var(--transition);
   position: relative;
   overflow: hidden;
+  background: linear-gradient(145deg, #ffffff, #f8fafc);
 }
 
 .feature::before {
@@ -284,7 +260,8 @@ h1 {
   padding: 2rem;
   border-radius: var(--radius-lg);
   margin-bottom: 2rem;
-  box-shadow: var(--shadow-md);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.02);
 }
 
 .progress-info h3 {
@@ -355,15 +332,15 @@ h1 {
   display: inline-flex;
   align-items: center;
   gap: 0.75rem;
-  padding: 1rem 2rem;
+  padding: 1.1rem 2.5rem;
   background: var(--bg-gradient);
   color: var(--text-light);
   text-decoration: none;
-  border-radius: var(--radius-lg);
+  border-radius: 9999px;
   font-weight: 600;
   font-size: 1.1rem;
   transition: var(--transition);
-  box-shadow: var(--shadow-md);
+  box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.4);
   position: relative;
   overflow: hidden;
 }
@@ -380,8 +357,8 @@ h1 {
 }
 
 .cta-button:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-lg);
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 15px 25px -5px rgba(79, 70, 229, 0.5);
 }
 
 .cta-button:hover::before {

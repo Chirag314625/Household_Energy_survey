@@ -15,7 +15,7 @@
   <div class="navbar-container">
     <a href="/" class="navbar-logo">
       <span>⚡</span>
-      Energy Suite
+      Household Energy Consumption
     </a>
     <ul class="navbar-links">
       <li><a href="/">Home</a></li>
@@ -30,219 +30,339 @@
     <h1>Energy Analyzer</h1>
     <span>Data Reporting Dashboard</span>
   </div>
-  <div class="header-badge">View Mode</div>
+  <button class="btn-calc header-calc" onclick="calculate()">Calculate Consumption</button>
 </header>
 
-<div class="main">
-
+<div class="main-container">
   <div class="sidebar">
-    <div class="sidebar-header">Select Equipment</div>
+    <div class="sidebar-header">Select & Configure Equipment</div>
 
     <div class="equipment-list" id="equipment-list">
-      <label class="equipment-option"><input type="checkbox" value="fridge" onchange="selectEquipment('fridge', this.checked)"> <span>Refrigerator</span></label>
-      <label class="equipment-option"><input type="checkbox" value="ac" onchange="selectEquipment('ac', this.checked)"> <span>Air Conditioner</span></label>
-      <label class="equipment-option"><input type="checkbox" value="washer" onchange="selectEquipment('washer', this.checked)"> <span>Washing Machine</span></label>
-      <label class="equipment-option"><input type="checkbox" value="fan" onchange="selectEquipment('fan', this.checked)"> <span>Ceiling Fan</span></label>
-      <label class="equipment-option"><input type="checkbox" value="computer" onchange="selectEquipment('computer', this.checked)"> <span>Computer System</span></label>
-      <label class="equipment-option"><input type="checkbox" value="kitchen" onchange="selectEquipment('kitchen', this.checked)"> <span>Kitchen Appliances</span></label>
-      <label class="equipment-option"><input type="checkbox" value="lighting" onchange="selectEquipment('lighting', this.checked)"> <span>Lighting</span></label>
-      <label class="equipment-option"><input type="checkbox" value="tv" onchange="selectEquipment('tv', this.checked)"> <span>Television</span></label>
-      <label class="equipment-option"><input type="checkbox" value="heater" onchange="selectEquipment('heater', this.checked)"> <span>Water Heater</span></label>
-    </div>
-
-    <div class="sidebar-header parameter-header">Equipment Parameters</div>
-
-    <div class="tabs">
-      <div class="tab" data-appliance="fridge" onclick="switchTab('fridge')">Fridge</div>
-      <div class="tab" data-appliance="ac" onclick="switchTab('ac')">AC</div>
-      <div class="tab" data-appliance="washer" onclick="switchTab('washer')">Washer</div>
-      <div class="tab" data-appliance="fan" onclick="switchTab('fan')">Fan</div>
-      <div class="tab" data-appliance="computer" onclick="switchTab('computer')">PC</div>
-      <div class="tab" data-appliance="kitchen" onclick="switchTab('kitchen')">Kitchen</div>
-      <div class="tab" data-appliance="lighting" onclick="switchTab('lighting')">Lights</div>
-      <div class="tab" data-appliance="tv" onclick="switchTab('tv')">TV</div>
-      <div class="tab" data-appliance="heater" onclick="switchTab('heater')">Heater</div>
-    </div>
-
-    <div class="sidebar-scroll">
-      <div class="empty-parameters" id="empty-parameters">Select equipment above to edit its parameters.</div>
-
-      <div class="panel" id="panel-fridge">
-        <div class="panel-title">Refrigerator</div>
-        <div class="toggle-row">
-          <span class="toggle-label">Enable component</span>
-          <div class="toggle on" id="tog-fridge" onclick="toggleAppliance('fridge', this)"></div>
-        </div>
-        <div class="field-row">
-          <div class="field"><label>Power (W)</label><input type="number" id="fridge-watts" value="150" min="50" max="500"/></div>
-          <div class="field"><label>Quantity</label><input type="number" id="fridge-qty" value="1" min="1" max="5"/></div>
-        </div>
-        <div class="field"><label>Efficiency Profile</label>
-          <select id="fridge-star">
-            <option value="0.80">Standard (80% duty cycle)</option>
-            <option value="0.65" selected>Efficient (65% duty cycle)</option>
-            <option value="0.50">Ultra-Efficient (50% duty cycle)</option>
-          </select>
-        </div>
-        <div class="info-box">Modeled as continuous operation with cyclic compressor loads.</div>
-      </div>
-
-      <div class="panel" id="panel-ac">
-        <div class="panel-title">Air Conditioner</div>
-        <div class="toggle-row">
-          <span class="toggle-label">Enable component</span>
-          <div class="toggle on" id="tog-ac" onclick="toggleAppliance('ac', this)"></div>
-        </div>
-        <div class="field-row">
-          <div class="field"><label>Capacity</label>
-            <select id="ac-ton">
-              <option value="1000">1.0 Ton (1000W)</option>
-              <option value="1500" selected>1.5 Ton (1500W)</option>
-              <option value="2000">2.0 Ton (2000W)</option>
-            </select>
+      
+      <div class="equipment-item">
+        <label class="equipment-header"><input type="checkbox" value="fridge" onchange="selectEquipment('fridge', this.checked)"> <span>Refrigerator</span></label>
+        <div class="equipment-params" id="panel-fridge">
+          <div class="param-content">
+            <div class="toggle-row">
+              <span class="toggle-label">Enable component</span>
+              <div class="toggle on" id="tog-fridge" onclick="toggleAppliance('fridge', this)"></div>
+            </div>
+            <div class="field-row">
+              <div class="field"><label>Power (W)</label><input type="number" id="fridge-watts" value="150" min="50" max="500"/></div>
+              <div class="field"><label>Quantity</label><input type="number" id="fridge-qty" value="1" min="1" max="5"/></div>
+            </div>
+            <div class="field"><label>Efficiency Profile</label>
+              <select id="fridge-star">
+                <option value="0.80">Standard (80% duty cycle)</option>
+                <option value="0.65" selected>Efficient (65% duty cycle)</option>
+                <option value="0.50">Ultra-Efficient (50% duty cycle)</option>
+              </select>
+            </div>
+            <div class="field-row">
+              <div class="field"><label>Age Condition</label>
+                <select id="fridge-age">
+                  <option value="1.00" selected>New / well maintained</option>
+                  <option value="1.10">5-10 years old</option>
+                  <option value="1.25">Older than 10 years</option>
+                </select>
+              </div>
+              <div class="field"><label>Room Temperature</label>
+                <select id="fridge-ambient">
+                  <option value="0.95">Cool room</option>
+                  <option value="1.00" selected>Normal room</option>
+                  <option value="1.12">Hot kitchen</option>
+                </select>
+              </div>
+            </div>
+            <div class="field"><label>Door Opening Pattern</label>
+              <select id="fridge-door">
+                <option value="0.95">Low</option>
+                <option value="1.00" selected>Normal</option>
+                <option value="1.15">Frequent</option>
+              </select>
+            </div>
+            <div class="info-box">Modeled as continuous operation with cyclic compressor loads.</div>
           </div>
-          <div class="field"><label>Quantity</label><input type="number" id="ac-qty" value="1" min="1" max="5"/></div>
-        </div>
-        <div class="field-row">
-          <div class="field"><label>Hours/Day</label><input type="number" id="ac-hours" value="8" min="0" max="24"/></div>
-          <div class="field"><label>EER Ratio</label><input type="number" id="ac-eer" value="2.8" min="1" max="5" step="0.1"/></div>
-        </div>
-        <div class="field"><label>Compressor Type</label>
-          <select id="ac-star">
-            <option value="1.0">Fixed Speed</option>
-            <option value="0.70" selected>Inverter (Variable)</option>
-          </select>
         </div>
       </div>
 
-      <div class="panel" id="panel-washer">
-        <div class="panel-title">Washing Machine</div>
-        <div class="toggle-row">
-          <span class="toggle-label">Enable component</span>
-          <div class="toggle on" id="tog-washer" onclick="toggleAppliance('washer', this)"></div>
-        </div>
-        <div class="field-row">
-          <div class="field"><label>Power (W)</label><input type="number" id="washer-watts" value="500" min="100" max="3000"/></div>
-          <div class="field"><label>Cycles/Day</label><input type="number" id="washer-cycles" value="1" min="0" max="5" step="0.5"/></div>
-        </div>
-        <div class="field-row">
-          <div class="field"><label>Thermal Multiplier</label><input type="number" id="washer-temp" value="1.0" min="0.6" max="1.5" step="0.1"/></div>
-          <div class="field"><label>Duration (min)</label><input type="number" id="washer-duration" value="45" min="15" max="120"/></div>
-        </div>
-        <div class="info-box">Heats water based on thermal multiplier.</div>
-      </div>
-
-      <div class="panel" id="panel-fan">
-        <div class="panel-title">Ceiling Fan</div>
-        <div class="toggle-row">
-          <span class="toggle-label">Enable component</span>
-          <div class="toggle on" id="tog-fan" onclick="toggleAppliance('fan', this)"></div>
-        </div>
-        <div class="field-row">
-          <div class="field"><label>Power (W)</label><input type="number" id="fan-watts" value="75" min="30" max="150"/></div>
-          <div class="field"><label>Quantity</label><input type="number" id="fan-qty" value="2" min="1" max="10"/></div>
-        </div>
-        <div class="field-row">
-          <div class="field"><label>Hours/Day</label><input type="number" id="fan-hours" value="10" min="0" max="24"/></div>
-          <div class="field"><label>Speed Factor</label><input type="number" id="fan-speed" value="1.0" min="0.5" max="1.5" step="0.1"/></div>
-        </div>
-      </div>
-
-      <div class="panel" id="panel-computer">
-        <div class="panel-title">Computer System</div>
-        <div class="toggle-row">
-          <span class="toggle-label">Enable component</span>
-          <div class="toggle on" id="tog-computer" onclick="toggleAppliance('computer', this)"></div>
-        </div>
-        <div class="field-row">
-          <div class="field"><label>CPU Power (W)</label><input type="number" id="comp-watts" value="200" min="50" max="500"/></div>
-          <div class="field"><label>Monitor (W)</label><input type="number" id="comp-monitor" value="50" min="20" max="150"/></div>
-        </div>
-        <div class="field-row">
-          <div class="field"><label>Hours/Day</label><input type="number" id="comp-hours" value="8" min="0" max="24"/></div>
-          <div class="field"><label>Router/Network (W)</label><input type="number" id="comp-router" value="20" min="10" max="50"/></div>
-        </div>
-      </div>
-
-      <div class="panel" id="panel-kitchen">
-        <div class="panel-title">Kitchen Appliances</div>
-        <div class="toggle-row">
-          <span class="toggle-label">Enable component</span>
-          <div class="toggle on" id="tog-kitchen" onclick="toggleAppliance('kitchen', this)"></div>
-        </div>
-        <div class="field-row">
-          <div class="field"><label>Microwave (W)</label><input type="number" id="kit-micro" value="1000" min="600" max="1500"/></div>
-          <div class="field"><label>Time/Day (min)</label><input type="number" id="kit-micro-h" value="15" min="0" max="120"/></div>
-        </div>
-        <div class="field-row">
-          <div class="field"><label>Induction (W)</label><input type="number" id="kit-induction" value="2000" min="1000" max="3500"/></div>
-          <div class="field"><label>Hours/Day</label><input type="number" id="kit-induction-h" value="1.5" min="0" max="8" step="0.5"/></div>
-        </div>
-      </div>
-
-      <div class="panel" id="panel-lighting">
-        <div class="panel-title">Lighting</div>
-        <div class="toggle-row">
-          <span class="toggle-label">Enable component</span>
-          <div class="toggle on" id="tog-lighting" onclick="toggleAppliance('lighting', this)"></div>
-        </div>
-        <div class="field-row">
-          <div class="field"><label>Power Per Bulb</label>
-            <select id="light-type">
-              <option value="5">LED (5W)</option>
-              <option value="15" selected>CFL (15W)</option>
-              <option value="60">Incandescent (60W)</option>
-            </select>
+      <div class="equipment-item">
+        <label class="equipment-header"><input type="checkbox" value="ac" onchange="selectEquipment('ac', this.checked)"> <span>Air Conditioner</span></label>
+        <div class="equipment-params" id="panel-ac">
+          <div class="param-content">
+            <div class="toggle-row">
+              <span class="toggle-label">Enable component</span>
+              <div class="toggle on" id="tog-ac" onclick="toggleAppliance('ac', this)"></div>
+            </div>
+            <div class="field-row">
+              <div class="field"><label>Capacity</label>
+                <select id="ac-ton">
+                  <option value="1000">1.0 Ton (1000W)</option>
+                  <option value="1500" selected>1.5 Ton (1500W)</option>
+                  <option value="2000">2.0 Ton (2000W)</option>
+                </select>
+              </div>
+              <div class="field"><label>Quantity</label><input type="number" id="ac-qty" value="1" min="1" max="5"/></div>
+            </div>
+            <div class="field-row">
+              <div class="field"><label>Hours/Day</label><input type="number" id="ac-hours" value="8" min="0" max="24"/></div>
+              <div class="field"><label>EER Ratio</label><input type="number" id="ac-eer" value="2.8" min="1" max="5" step="0.1"/></div>
+            </div>
+            <div class="field"><label>Compressor Type</label>
+              <select id="ac-star">
+                <option value="1.0">Fixed Speed</option>
+                <option value="0.70" selected>Inverter (Variable)</option>
+              </select>
+            </div>
+            <div class="field-row">
+              <div class="field"><label>Outdoor Heat</label>
+                <select id="ac-temp">
+                  <option value="0.90">Mild</option>
+                  <option value="1.00" selected>Warm</option>
+                  <option value="1.20">Very hot</option>
+                </select>
+              </div>
+              <div class="field"><label>Thermostat Setpoint</label>
+                <select id="ac-setpoint">
+                  <option value="1.20">20-22 C</option>
+                  <option value="1.00" selected>24 C</option>
+                  <option value="0.85">26 C or higher</option>
+                </select>
+              </div>
+            </div>
+            <div class="field"><label>Filter / Service Condition</label>
+              <select id="ac-maintenance">
+                <option value="0.95">Recently serviced</option>
+                <option value="1.00" selected>Normal</option>
+                <option value="1.15">Dusty filters</option>
+              </select>
+            </div>
           </div>
-          <div class="field"><label>Number of Bulbs</label><input type="number" id="light-qty" value="10" min="1" max="50"/></div>
         </div>
-        <div class="field"><label>Hours/Day</label><input type="number" id="light-hours" value="5" min="0" max="24"/></div>
       </div>
 
-      <div class="panel" id="panel-tv">
-        <div class="panel-title">Television</div>
-        <div class="toggle-row">
-          <span class="toggle-label">Enable component</span>
-          <div class="toggle on" id="tog-tv" onclick="toggleAppliance('tv', this)"></div>
-        </div>
-        <div class="field-row">
-          <div class="field"><label>Screen Size & Type</label>
-            <select id="tv-size">
-              <option value="40">32" LED (40W)</option>
-              <option value="70" selected>42" Smart TV (70W)</option>
-              <option value="100">55" 4K (100W)</option>
-              <option value="150">65" OLED (150W)</option>
-            </select>
+      <div class="equipment-item">
+        <label class="equipment-header"><input type="checkbox" value="washer" onchange="selectEquipment('washer', this.checked)"> <span>Washing Machine</span></label>
+        <div class="equipment-params" id="panel-washer">
+          <div class="param-content">
+            <div class="toggle-row">
+              <span class="toggle-label">Enable component</span>
+              <div class="toggle on" id="tog-washer" onclick="toggleAppliance('washer', this)"></div>
+            </div>
+            <div class="field-row">
+              <div class="field"><label>Power (W)</label><input type="number" id="washer-watts" value="500" min="100" max="3000"/></div>
+              <div class="field"><label>Cycles/Day</label><input type="number" id="washer-cycles" value="1" min="0" max="5" step="0.5"/></div>
+            </div>
+            <div class="field-row">
+              <div class="field"><label>Thermal Multiplier</label><input type="number" id="washer-temp" value="1.0" min="0.6" max="1.5" step="0.1"/></div>
+              <div class="field"><label>Duration (min)</label><input type="number" id="washer-duration" value="45" min="15" max="120"/></div>
+            </div>
+            <div class="field-row">
+              <div class="field"><label>Load Size</label>
+                <select id="washer-load">
+                  <option value="0.75">Small</option>
+                  <option value="1.00" selected>Medium</option>
+                  <option value="1.20">Full load</option>
+                </select>
+              </div>
+              <div class="field"><label>Spin Intensity</label>
+                <select id="washer-spin">
+                  <option value="0.90">Gentle</option>
+                  <option value="1.00" selected>Normal</option>
+                  <option value="1.12">High spin</option>
+                </select>
+              </div>
+            </div>
+            <div class="info-box">Heats water based on thermal multiplier.</div>
           </div>
-          <div class="field"><label>Hours/Day</label><input type="number" id="tv-hours" value="4" min="0" max="24"/></div>
         </div>
       </div>
 
-      <div class="panel" id="panel-heater">
-        <div class="panel-title">Water Heater</div>
-        <div class="toggle-row">
-          <span class="toggle-label">Enable component</span>
-          <div class="toggle on" id="tog-heater" onclick="toggleAppliance('heater', this)"></div>
-        </div>
-        <div class="field-row">
-          <div class="field"><label>Capacity (Liters)</label><input type="number" id="heat-liters" value="50" min="10" max="200"/></div>
-          <div class="field"><label>Uses/Day</label><input type="number" id="heat-uses" value="2" min="0" max="10" step="0.5"/></div>
-        </div>
-        <div class="field-row">
-          <div class="field"><label>Temp Rise (°C)</label><input type="number" id="heat-dt" value="30" min="10" max="60"/></div>
-          <div class="field"><label>Efficiency (%)</label><input type="number" id="heat-eff" value="85" min="50" max="95"/></div>
+      <div class="equipment-item">
+        <label class="equipment-header"><input type="checkbox" value="fan" onchange="selectEquipment('fan', this.checked)"> <span>Ceiling Fan</span></label>
+        <div class="equipment-params" id="panel-fan">
+          <div class="param-content">
+            <div class="toggle-row">
+              <span class="toggle-label">Enable component</span>
+              <div class="toggle on" id="tog-fan" onclick="toggleAppliance('fan', this)"></div>
+            </div>
+            <div class="field-row">
+              <div class="field"><label>Power (W)</label><input type="number" id="fan-watts" value="75" min="30" max="150"/></div>
+              <div class="field"><label>Quantity</label><input type="number" id="fan-qty" value="2" min="1" max="10"/></div>
+            </div>
+            <div class="field-row">
+              <div class="field"><label>Hours/Day</label><input type="number" id="fan-hours" value="10" min="0" max="24"/></div>
+              <div class="field"><label>Speed Factor</label><input type="number" id="fan-speed" value="1.0" min="0.5" max="1.5" step="0.1"/></div>
+            </div>
+            <div class="field"><label>Motor Type</label>
+              <select id="fan-motor">
+                <option value="0.55">BLDC efficient</option>
+                <option value="1.00" selected>Standard induction</option>
+                <option value="1.15">Older fan</option>
+              </select>
+            </div>
+          </div>
         </div>
       </div>
+
+      <div class="equipment-item">
+        <label class="equipment-header"><input type="checkbox" value="computer" onchange="selectEquipment('computer', this.checked)"> <span>Computer System</span></label>
+        <div class="equipment-params" id="panel-computer">
+          <div class="param-content">
+            <div class="toggle-row">
+              <span class="toggle-label">Enable component</span>
+              <div class="toggle on" id="tog-computer" onclick="toggleAppliance('computer', this)"></div>
+            </div>
+            <div class="field-row">
+              <div class="field"><label>CPU Power (W)</label><input type="number" id="comp-watts" value="200" min="50" max="500"/></div>
+              <div class="field"><label>Monitor (W)</label><input type="number" id="comp-monitor" value="50" min="20" max="150"/></div>
+            </div>
+            <div class="field-row">
+              <div class="field"><label>Hours/Day</label><input type="number" id="comp-hours" value="8" min="0" max="24"/></div>
+              <div class="field"><label>Router/Network (W)</label><input type="number" id="comp-router" value="20" min="10" max="50"/></div>
+            </div>
+            <div class="field-row">
+              <div class="field"><label>Number of Systems</label><input type="number" id="comp-qty" value="1" min="1" max="10"/></div>
+              <div class="field"><label>Standby Power (W)</label><input type="number" id="comp-standby" value="5" min="0" max="50"/></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="equipment-item">
+        <label class="equipment-header"><input type="checkbox" value="kitchen" onchange="selectEquipment('kitchen', this.checked)"> <span>Kitchen Appliances</span></label>
+        <div class="equipment-params" id="panel-kitchen">
+          <div class="param-content">
+            <div class="toggle-row">
+              <span class="toggle-label">Enable component</span>
+              <div class="toggle on" id="tog-kitchen" onclick="toggleAppliance('kitchen', this)"></div>
+            </div>
+            <div class="field-row">
+              <div class="field"><label>Microwave (W)</label><input type="number" id="kit-micro" value="1000" min="600" max="1500"/></div>
+              <div class="field"><label>Time/Day (min)</label><input type="number" id="kit-micro-h" value="15" min="0" max="120"/></div>
+            </div>
+            <div class="field-row">
+              <div class="field"><label>Induction (W)</label><input type="number" id="kit-induction" value="2000" min="1000" max="3500"/></div>
+              <div class="field"><label>Hours/Day</label><input type="number" id="kit-induction-h" value="1.5" min="0" max="8" step="0.5"/></div>
+            </div>
+            <div class="field-row">
+              <div class="field"><label>Kettle (W)</label><input type="number" id="kit-kettle" value="1500" min="0" max="2500"/></div>
+              <div class="field"><label>Kettle Min/Day</label><input type="number" id="kit-kettle-h" value="8" min="0" max="120"/></div>
+            </div>
+            <div class="field-row">
+              <div class="field"><label>Rice Cooker (W)</label><input type="number" id="kit-rice" value="700" min="0" max="1500"/></div>
+              <div class="field"><label>Rice Hours/Day</label><input type="number" id="kit-rice-h" value="0.5" min="0" max="6" step="0.25"/></div>
+            </div>
+            <div class="field-row">
+              <div class="field"><label>Mixer / Blender (W)</label><input type="number" id="kit-mixer" value="400" min="0" max="1000"/></div>
+              <div class="field"><label>Mixer Min/Day</label><input type="number" id="kit-mixer-h" value="5" min="0" max="60"/></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="equipment-item">
+        <label class="equipment-header"><input type="checkbox" value="lighting" onchange="selectEquipment('lighting', this.checked)"> <span>Lighting</span></label>
+        <div class="equipment-params" id="panel-lighting">
+          <div class="param-content">
+            <div class="toggle-row">
+              <span class="toggle-label">Enable component</span>
+              <div class="toggle on" id="tog-lighting" onclick="toggleAppliance('lighting', this)"></div>
+            </div>
+            <div class="field-row">
+              <div class="field"><label>Power Per Bulb</label>
+                <select id="light-type">
+                  <option value="5">LED (5W)</option>
+                  <option value="15" selected>CFL (15W)</option>
+                  <option value="60">Incandescent (60W)</option>
+                </select>
+              </div>
+              <div class="field"><label>Number of Bulbs</label><input type="number" id="light-qty" value="10" min="1" max="50"/></div>
+            </div>
+            <div class="field-row">
+              <div class="field"><label>Hours/Day</label><input type="number" id="light-hours" value="5" min="0" max="24"/></div>
+              <div class="field"><label>Daylight Availability</label>
+                <select id="light-daylight">
+                  <option value="0.80">Good daylight</option>
+                  <option value="1.00" selected>Average</option>
+                  <option value="1.15">Low daylight</option>
+                </select>
+              </div>
+            </div>
+            <div class="field"><label>Occupancy Pattern</label>
+              <select id="light-occupancy">
+                <option value="0.85">Mostly empty rooms</option>
+                <option value="1.00" selected>Normal</option>
+                <option value="1.15">Always occupied</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="equipment-item">
+        <label class="equipment-header"><input type="checkbox" value="tv" onchange="selectEquipment('tv', this.checked)"> <span>Television</span></label>
+        <div class="equipment-params" id="panel-tv">
+          <div class="param-content">
+            <div class="toggle-row">
+              <span class="toggle-label">Enable component</span>
+              <div class="toggle on" id="tog-tv" onclick="toggleAppliance('tv', this)"></div>
+            </div>
+            <div class="field-row">
+              <div class="field"><label>Screen Size & Type</label>
+                <select id="tv-size">
+                  <option value="40">32" LED (40W)</option>
+                  <option value="70" selected>42" Smart TV (70W)</option>
+                  <option value="100">55" 4K (100W)</option>
+                  <option value="150">65" OLED (150W)</option>
+                </select>
+              </div>
+              <div class="field"><label>Hours/Day</label><input type="number" id="tv-hours" value="4" min="0" max="24"/></div>
+            </div>
+            <div class="field-row">
+              <div class="field"><label>Quantity</label><input type="number" id="tv-qty" value="1" min="1" max="8"/></div>
+              <div class="field"><label>Standby Power (W)</label><input type="number" id="tv-standby" value="1.5" min="0" max="10" step="0.5"/></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="equipment-item">
+        <label class="equipment-header"><input type="checkbox" value="heater" onchange="selectEquipment('heater', this.checked)"> <span>Water Heater</span></label>
+        <div class="equipment-params" id="panel-heater">
+          <div class="param-content">
+            <div class="toggle-row">
+              <span class="toggle-label">Enable component</span>
+              <div class="toggle on" id="tog-heater" onclick="toggleAppliance('heater', this)"></div>
+            </div>
+            <div class="field-row">
+              <div class="field"><label>Capacity (Liters)</label><input type="number" id="heat-liters" value="50" min="10" max="200"/></div>
+              <div class="field"><label>Uses/Day</label><input type="number" id="heat-uses" value="2" min="0" max="10" step="0.5"/></div>
+            </div>
+            <div class="field-row">
+              <div class="field"><label>Temp Rise (°C)</label><input type="number" id="heat-dt" value="30" min="10" max="60"/></div>
+              <div class="field"><label>Efficiency (%)</label><input type="number" id="heat-eff" value="85" min="50" max="95"/></div>
+            </div>
+            <div class="field"><label>Tank Heat Loss</label>
+              <select id="heat-insulation">
+                <option value="0.95">Well insulated</option>
+                <option value="1.00" selected>Normal</option>
+                <option value="1.20">Older tank / heat loss</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+
     </div>
 
     <div class="calc-wrap">
       <label style="display:block;margin-bottom:10px;font-size:0.85rem;color:var(--text-muted);font-weight:500;">Electricity Rate (₹/kWh)</label>
-      <input type="number" id="tariff" value="7" min="1" max="20" step="0.5" style="width:100%;padding:10px;border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:15px;font-size:0.9rem;"/>
-      <button class="btn-calc" onclick="calculate()">📊 Calculate Consumption</button>
+      <input type="number" id="tariff" value="7" min="1" max="20" step="0.5" style="width:100%;padding:10px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:0.9rem;"/>
     </div>
   </div>
 
-  <div style="display:flex;flex-direction:column;overflow-y:auto;">
+  <div class="results-panel">
     <div class="results">
       <div class="placeholder" id="placeholder">
         Enter appliance parameters and click "Calculate Consumption" to see your energy usage analysis
@@ -288,12 +408,6 @@
             <div class="chart-title">Daily Consumption by Appliance</div>
             <div class="chart-wrap">
               <canvas id="barChart"></canvas>
-            </div>
-          </div>
-          <div class="chart-card full">
-            <div class="chart-title">12-Month Projection</div>
-            <div class="chart-wrap tall">
-              <canvas id="lineChart"></canvas>
             </div>
           </div>
         </div>

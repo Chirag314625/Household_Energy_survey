@@ -56,28 +56,36 @@ else:
 # ==================== ENERGY CALCULATION MODELS ====================
 
 def calculate_refrigerator(data):
-    """Refrigerator daily kWh based on wattage, duty cycle, and quantity."""
+    """Refrigerator daily kWh based on wattage, duty cycle, quantity, and operating conditions."""
     watts = float(data.get('watts', 150))
     duty = float(data.get('duty', 0.65))
     qty = float(data.get('qty', 1))
-    return (watts * 24 * duty * qty) / 1000
+    age_factor = float(data.get('age_factor', 1))
+    ambient_factor = float(data.get('ambient_factor', 1))
+    door_factor = float(data.get('door_factor', 1))
+    return (watts * 24 * duty * qty * age_factor * ambient_factor * door_factor) / 1000
 
 def calculate_air_conditioner(data):
-    """Air conditioner daily kWh adjusted by EER/profile factor."""
+    """Air conditioner daily kWh adjusted by EER/profile, temperature, and maintenance factors."""
     watts = float(data.get('watts', 1500))
     eer = max(float(data.get('eer', 2.8)), 0.1)
     star_factor = float(data.get('star_factor', 1))
     hours = float(data.get('hours', 8))
     qty = float(data.get('qty', 1))
-    return (watts / eer * star_factor * hours * qty) / 1000
+    temp_factor = float(data.get('temp_factor', 1))
+    setpoint_factor = float(data.get('setpoint_factor', 1))
+    maintenance_factor = float(data.get('maintenance_factor', 1))
+    return (watts / eer * star_factor * hours * qty * temp_factor * setpoint_factor * maintenance_factor) / 1000
 
 def calculate_washing_machine(data):
-    """Washing machine daily kWh from wattage, cycle duration, and cycles."""
+    """Washing machine daily kWh from wattage, cycle duration, load, spin, and cycles."""
     watts = float(data.get('watts', 500))
     duration = float(data.get('duration', 45))
     cycles = float(data.get('cycles', 1))
     temp_factor = float(data.get('temp_factor', 1))
-    return (watts * (duration / 60) * cycles * temp_factor) / 1000
+    load_factor = float(data.get('load_factor', 1))
+    spin_factor = float(data.get('spin_factor', 1))
+    return (watts * (duration / 60) * cycles * temp_factor * load_factor * spin_factor) / 1000
 
 def calculate_ceiling_fan(data):
     """Ceiling fan daily kWh from wattage, quantity, hours, and speed factor."""
@@ -85,47 +93,68 @@ def calculate_ceiling_fan(data):
     qty = float(data.get('qty', 1))
     hours = float(data.get('hours', 10))
     speed = float(data.get('speed', 1))
-    return (watts * qty * hours * speed) / 1000
+    motor_factor = float(data.get('motor_factor', 1))
+    return (watts * qty * hours * speed * motor_factor) / 1000
 
 def calculate_computer(data):
-    """Computer plus always-on router daily kWh."""
+    """Computer, monitor, standby, and always-on router daily kWh."""
     watts = float(data.get('watts', 200))
     monitor = float(data.get('monitor', 50))
     hours = float(data.get('hours', 8))
     router = float(data.get('router', 20))
-    return ((watts + monitor) * hours + router * 24) / 1000
+    qty = float(data.get('qty', 1))
+    standby = float(data.get('standby', 5))
+    idle_hours = max(24 - hours, 0)
+    return (((watts + monitor) * hours * qty) + (standby * idle_hours * qty) + (router * 24)) / 1000
 
 def calculate_kitchen(data):
-    """Kitchen daily kWh from microwave minutes and induction hours."""
+    """Kitchen daily kWh from common small cooking appliances."""
     micro_watts = float(data.get('micro_watts', 1000))
     micro_mins = float(data.get('micro_mins', 15))
     induction_watts = float(data.get('induction_watts', 2000))
     induction_hours = float(data.get('induction_hours', 1.5))
-    return (micro_watts * (micro_mins / 60) + induction_watts * induction_hours) / 1000
+    kettle_watts = float(data.get('kettle_watts', 0))
+    kettle_mins = float(data.get('kettle_mins', 0))
+    rice_watts = float(data.get('rice_watts', 0))
+    rice_hours = float(data.get('rice_hours', 0))
+    mixer_watts = float(data.get('mixer_watts', 0))
+    mixer_mins = float(data.get('mixer_mins', 0))
+    daily_wh = (
+        micro_watts * (micro_mins / 60)
+        + induction_watts * induction_hours
+        + kettle_watts * (kettle_mins / 60)
+        + rice_watts * rice_hours
+        + mixer_watts * (mixer_mins / 60)
+    )
+    return daily_wh / 1000
 
 def calculate_lighting(data):
-    """Lighting daily kWh from bulb wattage, quantity, and usage hours."""
+    """Lighting daily kWh from bulb wattage, quantity, usage, daylight, and occupancy factors."""
     watts = float(data.get('watts', 15))
     qty = float(data.get('qty', 10))
     hours = float(data.get('hours', 5))
-    return (watts * qty * hours) / 1000
+    daylight_factor = float(data.get('daylight_factor', 1))
+    occupancy_factor = float(data.get('occupancy_factor', 1))
+    return (watts * qty * hours * daylight_factor * occupancy_factor) / 1000
 
 def calculate_television(data):
-    """Television daily kWh from wattage, quantity, and hours."""
+    """Television daily kWh from wattage, quantity, viewing hours, and standby."""
     watts = float(data.get('watts', 70))
     qty = float(data.get('qty', 1))
     hours = float(data.get('hours', 4))
-    return (watts * qty * hours) / 1000
+    standby = float(data.get('standby', 1.5))
+    return ((watts * qty * hours) + (standby * qty * max(24 - hours, 0))) / 1000
 
 def calculate_water_heater(data):
-    """Water heater daily kWh from hot-water volume and temperature rise."""
+    """Water heater daily kWh from hot-water volume, temperature rise, efficiency, and losses."""
     liters = float(data.get('liters', 50))
     uses = float(data.get('uses', 2))
     target_temp = float(data.get('target_temp', 55))
     inlet_temp = float(data.get('inlet_temp', 25))
     efficiency = max(float(data.get('efficiency', 85)) / 100, 0.1)
+    insulation_factor = float(data.get('insulation_factor', 1))
     temp_rise = max(target_temp - inlet_temp, 0)
-    return (liters * uses * 4.186 * temp_rise) / (3600 * efficiency)
+    return ((liters * uses * 4.186 * temp_rise) / (3600 * efficiency)) * insulation_factor
 
 # ==================== ROUTES ====================
 

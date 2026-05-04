@@ -5,38 +5,17 @@ const selected = { fridge:false, ac:false, washer:false, fan:false, computer:fal
 const enabled = { fridge:false, ac:false, washer:false, fan:false, computer:false, kitchen:false, lighting:false, tv:false, heater:false };
 let pieChartInstance = null;
 let barChartInstance = null;
-let lineChartInstance = null;
 
-function switchTab(id) {
-  if (!selected[id]) return;
-  document.querySelectorAll('.tab').forEach(t => {
-    t.classList.toggle('active', t.dataset.appliance === id);
-  });
-  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-  document.getElementById('panel-' + id).classList.add('active');
-}
-
-function renderSelectedEquipment(preferredId = null) {
-  const activePanel = document.querySelector('.panel.active');
-  const activeId = activePanel ? activePanel.id.replace('panel-', '') : null;
+function renderSelectedEquipment() {
   const visibleIds = applianceIds.filter(id => selected[id]);
 
-  document.querySelectorAll('.tab').forEach(tab => {
-    tab.style.display = selected[tab.dataset.appliance] ? 'block' : 'none';
-    tab.classList.remove('active');
+  // Show/hide parameters for each equipment
+  applianceIds.forEach(id => {
+    const params = document.getElementById('panel-' + id);
+    if (params) {
+      params.classList.toggle('active', selected[id]);
+    }
   });
-  document.querySelectorAll('.panel').forEach(panel => panel.classList.remove('active'));
-
-  document.getElementById('empty-parameters').style.display = visibleIds.length ? 'none' : 'block';
-
-  if (!visibleIds.length) return;
-
-  const nextId = preferredId && selected[preferredId]
-    ? preferredId
-    : selected[activeId]
-      ? activeId
-      : visibleIds[0];
-  switchTab(nextId);
 }
 
 function selectEquipment(id, checked) {
@@ -46,7 +25,7 @@ function selectEquipment(id, checked) {
   const toggle = document.getElementById('tog-' + id);
   if (toggle) toggle.classList.toggle('on', checked);
 
-  renderSelectedEquipment(checked ? id : null);
+  renderSelectedEquipment();
 }
 
 function toggleAppliance(id, el) {
@@ -65,7 +44,10 @@ async function calculate() {
     data.fridge = {
       watts: gv('fridge-watts'),
       duty: parseFloat(document.getElementById('fridge-star').value),
-      qty: gv('fridge-qty')
+      qty: gv('fridge-qty'),
+      age_factor: gv('fridge-age'),
+      ambient_factor: gv('fridge-ambient'),
+      door_factor: gv('fridge-door')
     };
   }
   if (selected.ac && enabled.ac) {
@@ -74,7 +56,10 @@ async function calculate() {
       eer: gv('ac-eer'),
       star_factor: parseFloat(document.getElementById('ac-star').value),
       hours: gv('ac-hours'),
-      qty: gv('ac-qty')
+      qty: gv('ac-qty'),
+      temp_factor: gv('ac-temp'),
+      setpoint_factor: gv('ac-setpoint'),
+      maintenance_factor: gv('ac-maintenance')
     };
   }
   if (selected.washer && enabled.washer) {
@@ -82,7 +67,9 @@ async function calculate() {
       watts: gv('washer-watts'),
       duration: gv('washer-duration'),
       cycles: gv('washer-cycles'),
-      temp_factor: gv('washer-temp')
+      temp_factor: gv('washer-temp'),
+      load_factor: gv('washer-load'),
+      spin_factor: gv('washer-spin')
     };
   }
   if (selected.fan && enabled.fan) {
@@ -90,7 +77,8 @@ async function calculate() {
       watts: gv('fan-watts'),
       qty: gv('fan-qty'),
       hours: gv('fan-hours'),
-      speed: gv('fan-speed')
+      speed: gv('fan-speed'),
+      motor_factor: gv('fan-motor')
     };
   }
   if (selected.computer && enabled.computer) {
@@ -98,7 +86,9 @@ async function calculate() {
       watts: gv('comp-watts'),
       monitor: gv('comp-monitor'),
       hours: gv('comp-hours'),
-      router: gv('comp-router')
+      router: gv('comp-router'),
+      qty: gv('comp-qty'),
+      standby: gv('comp-standby')
     };
   }
   if (selected.kitchen && enabled.kitchen) {
@@ -106,22 +96,30 @@ async function calculate() {
       micro_watts: gv('kit-micro'),
       micro_mins: gv('kit-micro-h'),
       induction_watts: gv('kit-induction'),
-      induction_hours: gv('kit-induction-h')
+      induction_hours: gv('kit-induction-h'),
+      kettle_watts: gv('kit-kettle'),
+      kettle_mins: gv('kit-kettle-h'),
+      rice_watts: gv('kit-rice'),
+      rice_hours: gv('kit-rice-h'),
+      mixer_watts: gv('kit-mixer'),
+      mixer_mins: gv('kit-mixer-h')
     };
   }
   if (selected.lighting && enabled.lighting) {
     data.lighting = {
       watts: gv('light-type'),
       qty: gv('light-qty'),
-      hours: gv('light-hours')
+      hours: gv('light-hours'),
+      daylight_factor: gv('light-daylight'),
+      occupancy_factor: gv('light-occupancy')
     };
   }
   if (selected.tv && enabled.tv) {
     data.tv = {
       watts: gv('tv-size'),
-      qty: 1,  // assuming 1 TV
+      qty: gv('tv-qty'),
       hours: gv('tv-hours'),
-      tech: 1.0  // assuming standard
+      standby: gv('tv-standby')
     };
   }
   if (selected.heater && enabled.heater) {
@@ -130,7 +128,8 @@ async function calculate() {
       uses: gv('heat-uses'),
       target_temp: 25 + gv('heat-dt'),  // assuming inlet 25
       inlet_temp: 25,
-      efficiency: gv('heat-eff')
+      efficiency: gv('heat-eff'),
+      insulation_factor: gv('heat-insulation')
     };
   }
 
@@ -237,33 +236,6 @@ function displayResults(result) {
       scales: {
         y: { beginAtZero: true }
       }
-    }
-  });
-
-  // Line chart for projection
-  const lineCtx = document.getElementById('lineChart').getContext('2d');
-  if (lineChartInstance) lineChartInstance.destroy();
-  const months = Array.from({length:12}, (_,i) => `Month ${i+1}`);
-  const cumulative = [];
-  let cum = 0;
-  for (let i = 0; i < 12; i++) {
-    cum += result.total_monthly;
-    cumulative.push(cum);
-  }
-  lineChartInstance = new Chart(lineCtx, {
-    type: 'line',
-    data: {
-      labels: months,
-      datasets: [{
-        label: 'Cumulative kWh',
-        data: cumulative,
-        borderColor: '#000',
-        fill: false
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false
     }
   });
 
