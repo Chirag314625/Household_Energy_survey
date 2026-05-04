@@ -1,21 +1,15 @@
 {
   "version": 2,
-  "buildCommand": "echo 'No build required'",
-  "public": true,
-  "rewrites": [
+  "builds": [
     {
-      "source": "/api/:path*",
-      "destination": "/api/:path*"
+      "src": "api/index.py",
+      "use": "@vercel/python"
     }
   ],
   "routes": [
     {
-      "src": "^/api/(.*)",
-      "dest": "/app/backend/app.py"
-    },
-    {
       "src": "/(.*)",
-      "dest": "/app/frontend/$1"
+      "dest": "api/index.py"
     }
   ],
   "env": {

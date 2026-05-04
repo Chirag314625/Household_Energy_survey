@@ -23,14 +23,16 @@ from models.television import Television
 from models.water_heater import WaterHeater
 
 BASE_DIR = Path(__file__).resolve().parents[2]
+FRONTEND_DIR = BASE_DIR / 'app' / 'frontend'
+PAGES_DIR = FRONTEND_DIR / 'pages'
 
 # Load environment variables from the project root, no matter where Flask is started.
 load_dotenv(BASE_DIR / '.env')
 
 app = Flask(__name__,
-    static_folder='../frontend',
+    static_folder=str(FRONTEND_DIR),
     static_url_path='',
-    template_folder='../frontend/pages'
+    template_folder=str(PAGES_DIR)
 )
 
 CORS(app)
@@ -38,20 +40,31 @@ CORS(app)
 # MongoDB Connection
 MONGODB_URI = os.getenv('MONGODB_URI', 'mongodb://localhost:27017/household_energy')
 if os.getenv('DISABLE_MONGODB') == '1':
+    client = None
     db = None
     surveys_collection = None
     print("MongoDB disabled by environment.")
 else:
     try:
-        client = MongoClient(MONGODB_URI, serverSelectionTimeoutMS=5000)
-        client.admin.command('ping')
+        client = MongoClient(MONGODB_URI, serverSelectionTimeoutMS=3000)
         db = client['household_energy']
         surveys_collection = db['surveys']
-        print("MongoDB connected successfully.")
+        print("MongoDB client initialized.")
     except Exception as e:
         print(f"MongoDB connection error: {e}")
+        client = None
         db = None
         surveys_collection = None
+
+def is_mongodb_connected():
+    if client is None:
+        return False
+    try:
+        client.admin.command('ping')
+        return True
+    except Exception as e:
+        print(f"MongoDB ping failed: {e}")
+        return False
 
 # ==================== ENERGY CALCULATION MODELS ====================
 
@@ -161,20 +174,20 @@ def calculate_water_heater(data):
 # Serve HTML pages - Main routes
 @app.route('/')
 def home():
-    return send_from_directory('../frontend/pages', 'home.html')
+    return send_from_directory(PAGES_DIR, 'home.html')
 
 @app.route('/index.html')
 @app.route('/survey')
 @app.route('/survey.html')
 def survey():
-    return send_from_directory('../frontend/pages', 'index.html')
+    return send_from_directory(PAGES_DIR, 'index.html')
 
 @app.route('/analyzer.html')
 @app.route('/analyzer')
 @app.route('/calculator')
 @app.route('/calculator.html')
 def analyzer():
-    return send_from_directory('../frontend/pages', 'analyzer.html')
+    return send_from_directory(PAGES_DIR, 'analyzer.html')
 
 @app.route('/thankyou.html')
 @app.route('/thankyou')
@@ -182,7 +195,7 @@ def analyzer():
 @app.route('/complete')
 @app.route('/complete.html')
 def thankyou():
-    return send_from_directory('../frontend/pages', 'thankyou.html')
+    return send_from_directory(PAGES_DIR, 'thankyou.html')
 
 # Catch-all route for any missing HTML files
 @app.route('/<path:filename>')
@@ -190,13 +203,13 @@ def catch_all(filename):
     # If it's an HTML file, try to serve it from pages directory
     if filename.endswith('.html'):
         try:
-            return send_from_directory('../frontend/pages', filename)
+            return send_from_directory(PAGES_DIR, filename)
         except FileNotFoundError:
             return f"Page '{filename}' not found", 404
 
     # If it's a CSS, JS, or other static file, serve from frontend directory
     try:
-        return send_from_directory('../frontend', filename)
+        return send_from_directory(FRONTEND_DIR, filename)
     except FileNotFoundError:
         return f"File '{filename}' not found", 404
 
@@ -215,7 +228,7 @@ def health():
             'api_calculate': '/api/calculate (POST)',
             'api_submit': '/api/submit-survey (POST)'
         },
-        'mongodb': 'connected' if db is not None else 'disconnected'
+        'mongodb': 'connected' if is_mongodb_connected() else 'disconnected'
     }, 200
 
 # ==================== API ENDPOINTS ====================
