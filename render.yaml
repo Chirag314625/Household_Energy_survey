@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: household-energy-survey
+    env: python
+    plan: free
+    buildCommand: pip install -r app/backend/requirements.txt
+    startCommand: gunicorn --chdir app/backend app:app
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: MONGODB_URI
+        sync: false
